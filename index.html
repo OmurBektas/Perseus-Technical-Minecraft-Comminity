@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perseus Teknik Minecraft Topluluğu</title>
+    <meta name="description" content="Yeni nesil teknik minecraft sunucusu.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        'apple-dark': '#1d1d1f',
+                        'apple-gray': '#86868b',
+                        'apple-blue': '#0071e3',
+                        'apple-bg': '#fbfbfd',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #fbfbfd; }
+        ::-webkit-scrollbar-thumb { background: #d1d1d6; border-radius: 10px; border: 2px solid #fbfbfd; }
+        
+        /* Marquee (Kayan Şerit) */
+        .marquee-container {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            overflow: hidden; 
+        }
+        .marquee-content {
+            display: flex;
+            gap: 2rem;
+            width: max-content; 
+            animation: scroll 40s linear infinite;
+        }
+        .marquee-content:hover { animation-play-state: paused; }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); } 
+        }
+    </style>
+</head>
+<body class="bg-apple-bg text-apple-dark antialiased">
+
+    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100/50 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+            <a href="#" class="font-semibold text-lg tracking-tight hover:opacity-70 transition">Perseus TMC</a>
+            <div class="hidden md:flex items-center gap-8 text-xs font-medium text-apple-dark">
+                <a href="#anilar" class="hover:text-apple-blue transition">Galeri</a>
+                <a href="#ozellikler" class="hover:text-apple-blue transition">Özellikler</a>
+                <a href="#ekip" class="hover:text-apple-blue transition">Ekip</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="text-xs font-medium hover:text-apple-blue transition">TR / EN</button>
+                <a href="https://discord.gg/fd7c5wtQhr" target="_blank" class="bg-apple-dark text-white text-xs px-4 py-2 rounded-full font-medium hover:bg-black transition hidden sm:block">Discord</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20 relative overflow-hidden">
+        <div class="max-w-5xl animate-fade-in-up z-10">
+            <h2 class="text-xs font-bold tracking-[0.2em] text-apple-gray uppercase mb-6">Vanilla • 1.12.2 Fabric • 1.17.1, 1.21.11</h2>
+            
+            <h1 class="text-5xl md:text-8xl font-bold tracking-tighter mb-8 text-apple-dark leading-tight">
+                Perseus Teknik<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-apple-blue to-purple-600">Minecraft Topluluğu</span>
+            </h1>
+            
+            <p class="text-lg md:text-2xl text-apple-gray font-normal leading-relaxed max-w-2xl mx-auto mb-10">
+                Teknik mükemmellik ve topluluk ruhunun buluştuğu nokta. <br>
+                Sınırları zorlayan projeler için bir aradayız.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="https://discord.gg/fd7c5wtQhr" target="_blank" class="bg-apple-blue text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-blue-600 transition shadow-xl hover:shadow-blue-500/30 transform hover:-translate-y-1 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 3.42 3.42 0 0 0-.974 2.016 19.553 19.553 0 0 0-4.757 0 3.428 3.428 0 0 0-.965-2.007.07.07 0 0 0-.08-.039 19.71 19.71 0 0 0-4.897 1.52.063.063 0 0 0-.026.027C1.487 9.537.42 14.607.727 19.64a.072.072 0 0 0 .028.053 19.927 19.927 0 0 0 5.993 3.018.077.077 0 0 0 .083-.027c.453-.618.847-1.275 1.182-1.97a.066.066 0 0 0-.036-.091 12.835 12.835 0 0 1-1.848-.876.067.067 0 0 1-.007-.113c.125-.093.25-.19.372-.289a.066.066 0 0 1 .07-.01c3.96 1.809 8.24 1.809 12.16 0a.067.067 0 0 1 .069.01c.123.099.248.196.374.29a.067.067 0 0 1-.006.113 12.486 12.486 0 0 1-1.847.873.066.066 0 0 0-.037.093c.338.697.734 1.355 1.187 1.97a.076.076 0 0 0 .083.028 19.9 19.9 0 0 0 6.002-3.018.076.076 0 0 0 .027-.052c.383-5.594-1.127-10.655-4.463-15.257a.062.062 0 0 0-.028-.027zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.946 2.419-2.157 2.419z"/></svg>
+                    Discord'a Katıl
+                </a>
+                <a href="#ozellikler" class="text-apple-blue px-8 py-4 rounded-full text-lg font-medium hover:bg-blue-50 transition">
+                    Detayları İncele &rarr;
+                </a>
+            </div>
+        </div>
+        
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-100/40 rounded-full blur-3xl -z-10"></div>
+    </section>
+
+    <section id="anilar" class="py-32 bg-white overflow-hidden">
+        <div class="text-center mb-16 px-6">
+            <h2 class="text-4xl md:text-6xl font-bold tracking-tight mb-4">Sunucumuzdan Kareler</h2>
+            <p class="text-apple-gray text-xl">Topluluğumuzun en özel anları.</p>
+        </div>
+
+        <div class="marquee-container w-full relative">
+            <div class="marquee-content px-4">
+                
+                <div class="w-80 h-[28rem] flex-shrink-0 relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
+                    <img src="https://i.postimg.cc/RC3BBJS2/1-12-2-ilk.png" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 text-white">
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-2 block">Başlangıç</span>
+                        <h3 class="text-2xl font-bold">Sunucuya İlk Giriş 7 Temmuz 2025</h3>
+                        <p class="text-sm text-gray-300 mt-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">Sunucu açılış günü.</p>
+                    </div>
+                </div>
+
+                <div class="w-80 h-[28rem] flex-shrink-0 relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
+                    <img src="https://i.postimg.cc/Dw6Ds7f4/ilk-cobblestone-farm.png" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 text-white">
+                        <span class="text-xs font-bold uppercase tracking-wider text-green-400 mb-2 block">Farm</span>
+                        <h3 class="text-2xl font-bold">İlk Farm 14 Temmuz 2025</h3>
+                    </div>
+                </div>
+
+                <div class="w-80 h-[28rem] flex-shrink-0 relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
+                    <img src="https://i.postimg.cc/902tJqJq/oneblock.png" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 text-white">
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-400 mb-2 block">OneBlock</span>
+                        <h3 class="text-2xl font-bold">Ekipçe OneBlock 30 Ocak 2026</h3>
+                    </div>
+                </div>
+
+                <div class="w-80 h-[28rem] flex-shrink-0 relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
+                    <img src="https://i.postimg.cc/zB6ffG4Y/asdassada5.png" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 text-white">
+                        <span class="text-xs font-bold uppercase tracking-wider text-red-400 mb-2 block">Perimeter</span>
+                        <h3 class="text-2xl font-bold">Spawn Perimeter</h3>
+                    </div>
+                </div>
+
+                <div class="w-80 h-[28rem] flex-shrink-0 relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
+                    <img src="https://i.postimg.cc/6Q9KJHqS/withermobswitch.png" class="w-full h-full object-cover transition duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 text-white">
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-2 block">Farm</span>
+                        <h3 class="text-2xl font-bold">Wither MobSwitch İçin Bedrock Kırma</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ozellikler" class="py-32 bg-apple-bg px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-5xl font-bold text-center mb-16">Teknik Üstünlük</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-10 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300">
+                    <div class="w-12 h-12 bg-blue-50 text-apple-blue rounded-full flex items-center justify-center mb-6 text-2xl">⚡</div>
+                    <h3 class="text-2xl font-bold mb-3">Maksimum Performans</h3>
+                    <p class="text-apple-gray font-medium leading-relaxed">
+                        Optimize edilmiş sunucu çekirdeği ile sabit 20 TPS garantisi. Lag yok, bahane yok.
+                    </p>
+                </div>
+                <div class="bg-white p-10 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300">
+                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-6 text-2xl">🌐</div>
+                    <h3 class="text-2xl font-bold mb-3">Düşük Gecikme</h3>
+                    <p class="text-apple-gray font-medium leading-relaxed">
+                        Özel yapılandırılmış Velocity proxy altyapısı ile milisaniyelik tepki süreleri.
+                    </p>
+                </div>
+                <div class="bg-white p-10 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300">
+                    <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-6 text-2xl">🛠️</div>
+                    <h3 class="text-2xl font-bold mb-3">TMC Dostu</h3>
+                    <p class="text-apple-gray font-medium leading-relaxed">
+                        Carpet Mod ve teknik oyuncular için gerekli tüm araçlar entegre ve kullanıma hazır.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ekip" class="py-32 bg-white px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-4xl md:text-6xl font-bold mb-4">Ekibimiz</h2>
+            <p class="text-apple-gray text-xl mb-16">Perseus'u inşa eden zihinler.</p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="flex flex-col items-center group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-lg group-hover:scale-105 transition duration-300">
+                        <img src="https://minotar.net/helm/omur77/150.png" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="text-xl font-bold">omur77</h4>
+                    <span class="mt-2 bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Owner</span>
+                </div>
+
+                <div class="flex flex-col items-center group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-lg group-hover:scale-105 transition duration-300">
+                        <img src="https://minotar.net/helm/FixTech/150.png" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="text-xl font-bold">FixTech</h4>
+                    <span class="mt-2 bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Owner</span>
+                </div>
+
+                <div class="flex flex-col items-center group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-lg group-hover:scale-105 transition duration-300">
+                        <img src="https://minotar.net/helm/Xeliune/150.png" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="text-xl font-bold">Xeliune</h4>
+                    <span class="mt-2 border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Member</span>
+                </div>
+
+                <div class="flex flex-col items-center group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-lg group-hover:scale-105 transition duration-300">
+                        <img src="https://minotar.net/helm/dylan213/150.png" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="text-xl font-bold">dylan213</h4>
+                    <span class="mt-2 border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Member</span>
+                </div>
+
+                <div class="flex flex-col items-center group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-lg group-hover:scale-105 transition duration-300">
+                        <img src="https://minotar.net/helm/pistonassa/150.png" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="text-xl font-bold">pistonassa</h4>
+                    <span class="mt-2 border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Member</span>
+                </div>
+
+                <div class="flex flex-col items-center group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-lg group-hover:scale-105 transition duration-300">
+                        <img src="https://minotar.net/helm/Qyner/150.png" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="text-xl font-bold">Qyner</h4>
+                    <span class="mt-2 border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Member</span>
+                </div>
+            </div>
+
+            <div class="mt-20">
+                <a href="https://discord.gg/fd7c5wtQhr" target="_blank" class="inline-flex items-center gap-3 bg-gray-100 hover:bg-gray-200 text-apple-dark font-medium px-8 py-4 rounded-full transition duration-300 transform hover:scale-105">
+                    <svg class="w-5 h-5 text-[#5865F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 3.42 3.42 0 0 0-.974 2.016 19.553 19.553 0 0 0-4.757 0 3.428 3.428 0 0 0-.965-2.007.07.07 0 0 0-.08-.039 19.71 19.71 0 0 0-4.897 1.52.063.063 0 0 0-.026.027C1.487 9.537.42 14.607.727 19.64a.072.072 0 0 0 .028.053 19.927 19.927 0 0 0 5.993 3.018.077.077 0 0 0 .083-.027c.453-.618.847-1.275 1.182-1.97a.066.066 0 0 0-.036-.091 12.835 12.835 0 0 1-1.848-.876.067.067 0 0 1-.007-.113c.125-.093.25-.19.372-.289a.066.066 0 0 1 .07-.01c3.96 1.809 8.24 1.809 12.16 0a.067.067 0 0 1 .069.01c.123.099.248.196.374.29a.067.067 0 0 1-.006.113 12.486 12.486 0 0 1-1.847.873.066.066 0 0 0-.037.093c.338.697.734 1.355 1.187 1.97a.076.076 0 0 0 .083.028 19.9 19.9 0 0 0 6.002-3.018.076.076 0 0 0 .027-.052c.383-5.594-1.127-10.655-4.463-15.257a.062.062 0 0 0-.028-.027zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.946 2.419-2.157 2.419z"/></path></svg>
+                    Ekibe katılmak için discord sunucumuza gelin &rarr;
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="bg-apple-bg py-12 border-t border-gray-200 text-center text-sm text-apple-gray">
+        <p class="mb-4">&copy; 2026 Perseus TMC. Tüm hakları saklıdır.</p>
+        <div class="flex justify-center gap-6 font-medium text-apple-dark">
+            <a href="https://discord.gg/fd7c5wtQhr" target="_blank" class="hover:underline">Discord</a>
+            <a href="#" class="hover:underline">Kurallar</a>
+            <a href="#" class="hover:underline">Destek</a>
+        </div>
+    </footer>
+
+</body>
+</html>
