@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perseus Social</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'] },
+                    colors: { 
+                        'dark-bg': '#202225',
+                        'dark-sidebar': '#2f3136',
+                        'dark-chat': '#36393f',
+                        'dark-hover': '#32353b',
+                        'dark-text': '#dcddde',
+                        'dark-input': '#40444b',
+                        'blurple': '#5865F2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root { --user-bubble-color: #5865F2; }
+        .bubble-sent { background-color: var(--user-bubble-color); color: white; border-radius: 20px 20px 0 20px; }
+        .bubble-received { border-radius: 20px 20px 20px 0; }
+        .blur-reveal { transition: filter 0.8s ease-in-out; }
+        
+        #userDropdown { transition: all 0.2s ease-in-out; transform-origin: top right; }
+        .dropdown-hidden { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .dropdown-visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+
+        .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-option:hover { transform: scale(1.1); }
+        .color-option.selected { border-color: white; box-shadow: 0 0 0 2px #5865F2; }
+    </style>
+</head>
+<body class="bg-white dark:bg-dark-bg antialiased h-screen overflow-hidden flex flex-col transition-colors duration-500">
+
+    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-700 p-4">
+        <div class="bg-white dark:bg-dark-sidebar p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border border-gray-100 dark:border-white/5">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Perseus'a Giriş</h2>
+            <p id="loginStatus" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Sadece topluluk üyeleri erişebilir.</p>
+            <form id="loginForm" class="space-y-4">
+                <input type="text" id="username" placeholder="Kullanıcı Adı" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-input dark:text-white border border-gray-200 dark:border-transparent text-sm focus:outline-none focus:border-blurple">
+                <input type="password" id="password" placeholder="Şifre" class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-dark-input dark:text-white border border-gray-200 dark:border-transparent text-sm focus:outline-none focus:border-blurple">
+                <button type="submit" class="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition">Giriş Yap</button>
+            </form>
+            <p id="errorMsg" class="text-red-500 text-xs mt-4 hidden">Hatalı bilgi.</p>
+        </div>
+    </div>
+
+    <div id="profileCard" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 px-4" onclick="closeProfileCard()">
+        <div class="bg-white dark:bg-dark-sidebar p-6 rounded-3xl shadow-2xl border border-gray-100 dark:border-white/10 w-full max-w-xs text-center transform scale-95 transition-transform duration-300 relative" id="profileCardContent" onclick="event.stopPropagation()">
+            <button onclick="closeProfileCard()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">✕</button>
+            
+            <img id="cardAvatar" src="" class="w-24 h-24 rounded-full mx-auto mb-4 shadow-lg border-4 border-white dark:border-dark-input">
+            <h3 id="cardName" class="text-2xl font-bold dark:text-white">Username</h3>
+            <span id="cardRole" class="bg-blurple/20 text-blurple text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide mt-2 inline-block">Rol</span>
+            <p id="cardBio" class="text-sm text-gray-500 dark:text-gray-400 mt-4 px-2 italic">...</p>
+
+            <button id="editProfileBtn" onclick="openEditModalFromCard()" class="hidden w-full mt-6 bg-gray-100 dark:bg-dark-input hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-white py-2 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                Profili Düzenle
+            </button>
+        </div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 backdrop-blur-md hidden opacity-0 transition-opacity duration-300 px-4">
+        <div class="bg-white dark:bg-dark-sidebar p-6 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-white/5 transform scale-95 transition-transform duration-300" id="editModalInner">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold dark:text-white">Profili Özelleştir</h3>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-red-500 transition">✕</button>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Hakkımda</label>
+                    <textarea id="inputBio" maxlength="100" rows="3" class="w-full p-3 rounded-xl bg-gray-50 dark:bg-dark-input dark:text-white border border-gray-200 dark:border-transparent text-sm focus:outline-none focus:border-blurple resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Mesaj Rengi</label>
+                    <div class="flex gap-3 justify-center">
+                        <div class="color-option bg-[#5865F2]" onclick="pickColor('#5865F2', this)"></div>
+                        <div class="color-option bg-[#3ba55c]" onclick="pickColor('#3ba55c', this)"></div>
+                        <div class="color-option bg-[#ed4245]" onclick="pickColor('#ed4245', this)"></div>
+                        <div class="color-option bg-[#eb459e]" onclick="pickColor('#eb459e', this)"></div>
+                        <div class="color-option bg-[#faa61a]" onclick="pickColor('#faa61a', this)"></div>
+                    </div>
+                </div>
+                <button onclick="saveChanges()" class="w-full bg-blurple hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-blue-500/20">Kaydet ve Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="flex w-full h-full blur-sm relative overflow-hidden">
+        
+        <div class="flex-1 flex flex-col h-full relative bg-white dark:bg-dark-chat">
+            
+            <header class="h-16 border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-3 md:px-4 bg-white/80 dark:bg-dark-chat/80 backdrop-blur-md sticky top-0 z-10">
+                <a href="/" class="flex items-center gap-2 text-gray-500 hover:text-blurple dark:text-gray-400 dark:hover:text-white transition group">
+                    <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <span class="hidden md:inline font-medium">Ana Sayfa</span>
+                </a>
+                
+                <div class="flex flex-col items-center dark:text-white ml-2 md:ml-0">
+                    <span class="font-bold text-sm md:text-base flex items-center gap-1 whitespace-nowrap">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Perseus Chat
+                    </span>
+                </div>
+                
+                <div class="flex items-center gap-1 md:gap-3 relative">
+                    <button id="mobileMembersBtn" class="md:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-hover transition text-gray-600 dark:text-gray-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </button>
+
+                    <button onclick="toggleTheme()" class="hidden md:block p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-hover transition text-gray-600 dark:text-gray-300">
+                        <svg id="sun-icon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="moon-icon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                    
+                    <div class="relative">
+                        <button id="profileBtn" class="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-dark-hover p-1.5 md:pr-3 rounded-full transition">
+                            <img id="headerAvatar" src="" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600">
+                            <span id="headerName" class="text-sm font-bold dark:text-white hidden md:block">...</span>
+                            <svg class="w-3 h-3 text-gray-500 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="userDropdown" class="dropdown-hidden absolute right-0 mt-2 w-48 max-w-[90vw] bg-white dark:bg-[#18191c] rounded-xl shadow-xl border border-gray-100 dark:border-white/5 overflow-hidden z-50">
+                            <div class="px-4 py-3 border-b border-gray-100 dark:border-white/5">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Oturum açıldı</p>
+                                <p id="dropdownName" class="text-sm font-bold text-gray-900 dark:text-white truncate">...</p>
+                            </div>
+                            <a href="#" onclick="openMyProfileCard()" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-blurple dark:hover:text-white transition">Profilim</a>
+                            <a href="yonetim" id="adminLink" class="hidden block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-blurple dark:hover:text-white transition">Yönetim Paneli</a>
+                            <div class="md:hidden border-t border-gray-100 dark:border-white/5 my-1"></div>
+                            <button onclick="toggleTheme()" class="md:hidden w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-blurple dark:hover:text-white transition">Temayı Değiştir</button>
+                            <div class="border-t border-gray-100 dark:border-white/5 my-1"></div>
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition">Çıkış Yap</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 space-y-6 pb-24" id="chatContainer">
+                <div class="text-center text-xs text-gray-400 font-medium my-4">Bugün</div>
+                <div class="flex justify-center text-gray-500 text-sm">Sohbet yükleniyor...</div>
+            </main>
+
+            <footer class="p-3 md:p-4 bg-white dark:bg-dark-chat border-t border-gray-100 dark:border-white/5 sticky bottom-0 z-10 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-none">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <input type="text" id="chatInput" placeholder="Mesaj gönder..." class="flex-1 bg-gray-100 dark:bg-dark-input border-none rounded-full px-4 py-3 text-sm dark:text-white focus:ring-2 focus:ring-blurple transition placeholder-gray-500" onkeypress="handleEnter(event)">
+                    <button onclick="sendMessage()" class="bg-blurple text-white p-3 rounded-full hover:opacity-90 transition transform active:scale-95"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></button>
+                </div>
+            </footer>
+        </div>
+        
+        <div id="membersOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300 md:hidden"></div>
+
+        <div id="membersSidebar" class="absolute md:relative right-0 top-0 bottom-0 transform translate-x-full md:translate-x-0 transition-transform duration-300 z-50 w-[80vw] max-w-[300px] md:w-72 md:max-w-none bg-white dark:bg-dark-sidebar flex flex-col border-l border-gray-200 dark:border-white/5 h-full shadow-2xl md:shadow-none">
+            <div class="p-5 md:p-6 border-b md:border-none border-gray-100 dark:border-white/5 flex justify-between items-center shrink-0">
+                <h3 class="font-bold dark:text-white text-xs md:text-sm uppercase tracking-wider text-gray-500">Topluluk Üyeleri</h3>
+                <button id="closeMembersBtn" class="md:hidden text-gray-500 hover:text-red-500 font-bold p-1">✕</button>
+            </div>
+            <div id="membersList" class="p-2 md:p-6 md:pt-0 space-y-1 overflow-y-auto flex-1">
+                </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './firebase.js';
+        import { collection, query, where, getDocs, updateDoc, doc, onSnapshot, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let currentUserData = null;
+        let tempColor = '#5865F2';
+
+        async function checkLogin() {
+            const storedUser = localStorage.getItem('perseus_uid'); 
+            
+            if (storedUser) {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainContent').classList.remove('blur-sm');
+                document.getElementById('mainContent').classList.add('blur-reveal');
+                
+                onSnapshot(doc(db, "users", storedUser), (docSnap) => {
+                    if (docSnap.exists()) {
+                        currentUserData = { id: docSnap.id, ...docSnap.data() };
+                        updateUI(currentUserData);
+                    } else {
+                        logout(); 
+                    }
+                });
+            } else {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
+        }
+
+        function updateUI(user) {
+            document.getElementById('headerName').innerText = user.username;
+            document.getElementById('dropdownName').innerText = user.username;
+            const img = `https://minotar.net/helm/${user.username}/100.png`;
+            document.getElementById('headerAvatar').src = img;
+            
+            if (user.role === 'Admin') {
+                document.getElementById('adminLink').classList.remove('hidden');
+            }
+
+            if (user.bubbleColor) {
+                document.documentElement.style.setProperty('--user-bubble-color', user.bubbleColor);
+            }
+        }
+
+        window.login = async function(e) {
+            e.preventDefault();
+            const uName = document.getElementById('username').value;
+            const uPass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            const q = query(collection(db, "users"), where("username", "==", uName), where("password", "==", uPass));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const userDoc = querySnapshot.docs[0];
+                localStorage.setItem('perseus_uid', userDoc.id); 
+                location.reload();
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+        document.getElementById('loginForm').addEventListener('submit', window.login);
+
+        window.showProfileCard = async function(username, role, bio) {
+            const card = document.getElementById('profileCard');
+            const content = document.getElementById('profileCardContent');
+            const editBtn = document.getElementById('editProfileBtn');
+
+            document.getElementById('cardName').innerText = username;
+            document.getElementById('cardRole').innerText = role || 'Üye';
+            document.getElementById('cardAvatar').src = `https://minotar.net/helm/${username}/100.png`;
+            document.getElementById('cardBio').innerText = bio || 'Henüz bir biyografi eklenmemiş.';
+
+            if (currentUserData && username === currentUserData.username) {
+                editBtn.classList.remove('hidden');
+            } else {
+                editBtn.classList.add('hidden');
+            }
+
+            card.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        window.openMyProfileCard = function() {
+            if (currentUserData) {
+                showProfileCard(currentUserData.username, currentUserData.role, currentUserData.bio);
+            }
+        }
+
+        window.openEditModalFromCard = function() {
+            closeProfileCard();
+            setTimeout(() => {
+                const modal = document.getElementById('editModal');
+                const inner = document.getElementById('editModalInner');
+                document.getElementById('inputBio').value = currentUserData.bio || '';
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    inner.classList.remove('scale-95');
+                    inner.classList.add('scale-100');
+                }, 10);
+            }, 300);
+        }
+
+        window.saveChanges = async function() {
+            const newBio = document.getElementById('inputBio').value;
+            if (currentUserData) {
+                const userRef = doc(db, "users", currentUserData.id);
+                await updateDoc(userRef, {
+                    bio: newBio,
+                    bubbleColor: tempColor
+                });
+                closeEditModal();
+            }
+        }
+
+        window.pickColor = function(color, el) {
+            tempColor = color;
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            const list = document.getElementById('membersList');
+            list.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const u = doc.data();
+                const html = `
+                    <div class="flex items-center gap-3 p-3 md:p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl cursor-pointer transition" onclick="showProfileCard('${u.username}', '${u.role}', '${u.bio || ''}')">
+                        <div class="relative"><img src="https://minotar.net/helm/${u.username}/100.png" class="w-10 h-10 md:w-8 md:h-8 rounded-full"><span class="absolute bottom-0 right-0 w-3 h-3 md:w-2.5 md:h-2.5 bg-green-500 border-2 border-white dark:border-dark-sidebar rounded-full"></span></div>
+                        <span class="text-sm md:text-sm font-medium dark:text-gray-300 truncate">${u.username}</span>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+        });
+
+        const qChat = query(collection(db, "chat"), orderBy("timestamp", "asc"), limit(50));
+        onSnapshot(qChat, (snapshot) => {
+            const chatArea = document.getElementById('chatContainer');
+            chatArea.innerHTML = '<div class="text-center text-xs text-gray-400 font-medium my-4">Bugün</div>';
+            
+            snapshot.forEach((doc) => {
+                const msg = doc.data();
+                const isMe = currentUserData && msg.sender === currentUserData.username;
+                
+                let html = '';
+                if (isMe) {
+                    html = `
+                        <div class="flex gap-2 md:gap-3 items-end justify-end group">
+                            <div class="flex flex-col gap-1 items-end max-w-[85%] md:max-w-[75%]">
+                                <div class="bubble-sent px-4 py-2.5 text-[15px] md:text-sm cursor-pointer hover:opacity-90 shadow-sm" onclick="openMyProfileCard()">${msg.text}</div>
+                            </div>
+                            <img src="https://minotar.net/helm/${msg.sender}/100.png" class="w-8 h-8 rounded-full mb-1 cursor-pointer transform group-hover:scale-110 transition hidden md:block" onclick="openMyProfileCard()">
+                        </div>`;
+                } else {
+                    html = `
+                        <div class="flex gap-2 md:gap-3 items-end group">
+                            <img src="https://minotar.net/helm/${msg.sender}/100.png" class="w-8 h-8 rounded-full mb-1 cursor-pointer transform group-hover:scale-110 transition" onclick="showProfileCard('${msg.sender}', '${msg.role || 'Üye'}', '')">
+                            <div class="flex flex-col gap-1 max-w-[85%] md:max-w-[75%]">
+                                <span class="text-[11px] text-gray-400 ml-1">${msg.sender}</span>
+                                <div class="bubble-received px-4 py-2.5 text-[15px] md:text-sm bg-gray-100 text-black dark:bg-dark-input dark:text-white shadow-sm">${msg.text}</div>
+                            </div>
+                        </div>`;
+                }
+                chatArea.insertAdjacentHTML('beforeend', html);
+            });
+            chatArea.scrollTop = chatArea.scrollHeight;
+        });
+
+        window.sendMessage = async function() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (text && currentUserData) {
+                await addDoc(collection(db, "chat"), {
+                    text: text,
+                    sender: currentUserData.username,
+                    role: currentUserData.role,
+                    timestamp: new Date()
+                });
+                input.value = '';
+            }
+        }
+
+        window.handleEnter = function(e) {
+            if(e.key === 'Enter') sendMessage();
+        }
+
+        checkLogin();
+
+    </script>
+
+    <script>
+        if (localStorage.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (!('theme' in localStorage)) localStorage.theme = 'light';
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        const profileBtn = document.getElementById('profileBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('dropdown-hidden');
+            userDropdown.classList.toggle('dropdown-visible');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                userDropdown.classList.add('dropdown-hidden');
+                userDropdown.classList.remove('dropdown-visible');
+            }
+        });
+
+        const memBtn = document.getElementById('mobileMembersBtn');
+        const memSidebar = document.getElementById('membersSidebar');
+        const memOverlay = document.getElementById('membersOverlay');
+        const closeMemBtn = document.getElementById('closeMembersBtn');
+
+        function toggleMembersSidebar() {
+            const isClosed = memSidebar.classList.contains('translate-x-full');
+            if(isClosed) {
+                memSidebar.classList.remove('translate-x-full');
+                memOverlay.classList.remove('hidden');
+                setTimeout(() => memOverlay.classList.remove('opacity-0'), 10);
+            } else {
+                memSidebar.classList.add('translate-x-full');
+                memOverlay.classList.add('opacity-0');
+                setTimeout(() => memOverlay.classList.add('hidden'), 300);
+            }
+        }
+
+        if(memBtn) memBtn.addEventListener('click', toggleMembersSidebar);
+        if(closeMemBtn) closeMemBtn.addEventListener('click', toggleMembersSidebar);
+        if(memOverlay) memOverlay.addEventListener('click', toggleMembersSidebar);
+
+        function closeProfileCard() {
+            const card = document.getElementById('profileCard');
+            const content = document.getElementById('profileCardContent');
+            card.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => card.classList.add('hidden'), 300);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            const inner = document.getElementById('editModalInner');
+            modal.classList.add('opacity-0');
+            inner.classList.remove('scale-100');
+            inner.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function logout() {
+            localStorage.removeItem('perseus_uid');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perseus Admin Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'] },
+                    colors: { 
+                        'dark-bg': '#202225',
+                        'dark-sidebar': '#2f3136',
+                        'blurple': '#5865F2',
+                        'success': '#3ba55c',
+                        'danger': '#ed4245'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-dark-bg text-gray-800 dark:text-gray-200 font-sans h-screen flex flex-col md:flex-row overflow-hidden transition-colors duration-300">
+
+    <aside class="w-full md:w-64 flex-none bg-white dark:bg-dark-sidebar border-b md:border-b-0 md:border-r border-gray-200 dark:border-white/5 flex flex-col z-20 shadow-sm md:shadow-none">
+        <div class="h-14 md:h-16 flex items-center justify-between md:justify-start px-4 md:px-6 border-b border-gray-200 dark:border-white/5 shrink-0">
+            <h1 class="font-bold text-lg tracking-wide text-blurple">Perseus <span class="text-gray-500 dark:text-gray-400">Admin</span></h1>
+            <button onclick="window.toggleTheme()" class="md:hidden p-1.5 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+
+        <nav class="flex-1 p-2 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto no-scrollbar">
+            <button onclick="window.switchTab('gallery')" id="btn-gallery" class="flex-1 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg bg-blurple text-white transition whitespace-nowrap text-sm md:text-base font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Galeri
+            </button>
+            <button onclick="window.switchTab('users')" id="btn-users" class="flex-1 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 transition whitespace-nowrap text-sm md:text-base font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Üyeler
+            </button>
+            <button onclick="window.switchTab('team')" id="btn-team" class="flex-1 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 transition whitespace-nowrap text-sm md:text-base font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                Ekip
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto relative w-full">
+        
+        <header class="py-3 px-4 md:h-16 md:px-8 flex flex-col md:flex-row justify-between items-center bg-white dark:bg-dark-sidebar border-b border-gray-200 dark:border-white/5 sticky top-0 z-10 gap-3 md:gap-0 shadow-sm md:shadow-none">
+            <h2 id="page-title" class="text-lg md:text-xl font-bold dark:text-white self-start md:self-auto">Galeri Yönetimi</h2>
+            
+            <div class="flex items-center gap-4 md:gap-6 self-end md:self-auto w-full md:w-auto justify-between md:justify-end">
+                <div class="flex gap-4">
+                    <a href="/" class="text-xs md:text-sm font-medium text-gray-500 hover:text-blurple dark:hover:text-white transition">Ana Sayfa</a>
+                    <a href="sohbet" class="text-xs md:text-sm font-medium text-gray-500 hover:text-blurple dark:hover:text-white transition">Sohbet</a>
+                </div>
+                
+                <button onclick="window.toggleTheme()" class="hidden md:block p-2 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <div class="flex items-center gap-3 border-l border-gray-200 dark:border-white/10 pl-4 md:pl-6">
+                    <img id="adminAvatar" src="https://minotar.net/helm/Steve/100.png" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600">
+                    <div class="flex flex-col">
+                        <span id="adminName" class="text-sm font-bold text-gray-900 dark:text-white leading-none">Yükleniyor...</span>
+                        <span class="text-[10px] text-blurple font-bold uppercase tracking-wider">Yönetici</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-4 md:p-8">
+            <div id="tab-gallery" class="space-y-6">
+                <div class="bg-white dark:bg-dark-sidebar p-5 md:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/5">
+                    <h3 class="font-bold mb-4 dark:text-white">Yeni İçerik Ekle (Firebase)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input id="g-date" type="text" placeholder="Tarih (Örn: 20.02.2026)" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 focus:outline-none focus:border-blurple dark:text-white">
+                        <input id="g-title" type="text" placeholder="Başlık (Örn: Yeni Farm)" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 focus:outline-none focus:border-blurple dark:text-white">
+                        <input id="g-img" type="text" placeholder="Resim (Postimages) veya Video (YouTube) Linki" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 focus:outline-none focus:border-blurple dark:text-white md:col-span-2">
+                        <textarea id="g-desc" placeholder="Açıklama" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 focus:outline-none focus:border-blurple dark:text-white md:col-span-2 h-20"></textarea>
+                    </div>
+                    <button id="addGalleryBtn" class="mt-4 w-full md:w-auto bg-success hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition">Buluta Kaydet</button>
+                </div>
+
+                <div class="bg-white dark:bg-dark-sidebar p-0 md:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden">
+                    <div class="p-5 md:p-0 border-b border-gray-100 dark:border-white/5 md:border-b-0 md:mb-4">
+                        <h3 class="font-bold dark:text-white">Mevcut Galeri (Canlı Veri)</h3>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[500px] text-left text-sm">
+                            <thead class="bg-gray-50 dark:bg-black/20 text-gray-500 uppercase">
+                                <tr><th class="p-3 pl-4 md:rounded-l-lg">Medya</th><th class="p-3">Tarih</th><th class="p-3">Başlık</th><th class="p-3 pr-4 md:rounded-r-lg text-right">İşlem</th></tr>
+                            </thead>
+                            <tbody id="gallery-list" class="divide-y divide-gray-100 dark:divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-users" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-dark-sidebar p-5 md:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/5">
+                    <h3 class="font-bold mb-4 dark:text-white">Yeni Üye Ekle</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input id="u-name" type="text" placeholder="Minecraft Kullanıcı Adı" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 dark:text-white">
+                        <input id="u-pass" type="text" placeholder="Şifre" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 dark:text-white">
+                        <select id="u-role" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 dark:text-white">
+                            <option value="Member">Üye</option>
+                            <option value="Admin">Yönetici</option>
+                        </select>
+                    </div>
+                    <button id="addUserBtn" class="mt-4 w-full md:w-auto bg-blurple hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition">Siteye Üye Ekle</button>
+                </div>
+
+                <div class="bg-white dark:bg-dark-sidebar p-0 md:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden">
+                    <div class="p-5 md:p-0 border-b border-gray-100 dark:border-white/5 md:border-b-0 md:mb-4">
+                        <h3 class="font-bold dark:text-white">Kayıtlı Site Üyeleri</h3>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[400px] text-left text-sm">
+                            <thead class="bg-gray-50 dark:bg-black/20 text-gray-500 uppercase">
+                                <tr><th class="p-3 pl-4 md:rounded-l-lg">Kullanıcı</th><th class="p-3">Rol</th><th class="p-3">Şifre</th><th class="p-3 pr-4 md:rounded-r-lg text-right">İşlem</th></tr>
+                            </thead>
+                            <tbody id="user-list" class="divide-y divide-gray-100 dark:divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-team" class="space-y-6 hidden">
+                <div class="bg-white dark:bg-dark-sidebar p-5 md:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/5">
+                    <h3 class="font-bold mb-2 dark:text-white">Ana Sayfa Ekibine Ekle</h3>
+                    <p class="text-sm text-gray-500 mb-4">Bu alandan eklediğiniz kişiler index.html ana sayfasındaki "Ekibimiz" bölümünde görünür.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input id="team-name" type="text" placeholder="Minecraft Kullanıcı Adı" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 dark:text-white">
+                        <select id="team-role" class="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#202225] border border-gray-200 dark:border-white/5 dark:text-white">
+                            <option value="Owner">Owner (Kurucu)</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Moderator">Moderator</option>
+                            <option value="Developer">Developer</option>
+                            <option value="Member">Member (Üye)</option>
+                        </select>
+                    </div>
+                    <button id="addTeamBtn" class="mt-4 w-full md:w-auto bg-blurple hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition">Ekibe Ekle</button>
+                </div>
+
+                <div class="bg-white dark:bg-dark-sidebar p-0 md:p-6 rounded-xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden">
+                    <div class="p-5 md:p-0 border-b border-gray-100 dark:border-white/5 md:border-b-0 md:mb-4">
+                        <h3 class="font-bold dark:text-white">Ana Sayfada Görünen Ekip</h3>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full min-w-[400px] text-left text-sm">
+                            <thead class="bg-gray-50 dark:bg-black/20 text-gray-500 uppercase">
+                                <tr><th class="p-3 pl-4 md:rounded-l-lg">Oyuncu</th><th class="p-3">Sunucu Rolü</th><th class="p-3 pr-4 md:rounded-r-lg text-right">İşlem</th></tr>
+                            </thead>
+                            <tbody id="team-list" class="divide-y divide-gray-100 dark:divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { db } from './firebase.js';
+        import { collection, addDoc, deleteDoc, doc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        async function loadAdminProfile() {
+            const uid = localStorage.getItem('perseus_uid');
+            if(uid) {
+                const userDoc = await getDoc(doc(db, "users", uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('adminName').innerText = data.username;
+                    document.getElementById('adminAvatar').src = `https://minotar.net/helm/${data.username}/100.png`;
+                }
+            } else {
+                document.getElementById('adminName').innerText = "Giriş Yapılmadı";
+            }
+        }
+        loadAdminProfile();
+
+        const galleryList = document.getElementById('gallery-list');
+        document.getElementById('addGalleryBtn').addEventListener('click', async () => {
+            const date = document.getElementById('g-date').value;
+            const title = document.getElementById('g-title').value;
+            const img = document.getElementById('g-img').value;
+            const desc = document.getElementById('g-desc').value;
+
+            if (date && title && img) {
+                try {
+                    await addDoc(collection(db, "gallery"), { date, title, image: img, description: desc, timestamp: new Date() });
+                    alert("Galeriye başarıyla eklendi!");
+                    document.getElementById('g-date').value = ''; document.getElementById('g-title').value = '';
+                    document.getElementById('g-img').value = ''; document.getElementById('g-desc').value = '';
+                } catch (e) { alert("Hata oluştu: " + e.message); }
+            } else { alert("Lütfen tarih, başlık ve resim/video URL'sini girin."); }
+        });
+
+        onSnapshot(collection(db, "gallery"), (snapshot) => {
+            galleryList.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                let previewHtml = `<img src="${data.image}" class="w-12 h-8 object-cover rounded border border-gray-200 dark:border-white/10">`;
+                if(data.image.includes('youtu')) previewHtml = `<span class="bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold">YOUTUBE</span>`;
+
+                galleryList.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                        <td class="p-3 pl-4">${previewHtml}</td>
+                        <td class="p-3 dark:text-gray-300">${data.date}</td>
+                        <td class="p-3 dark:text-white font-medium">${data.title}</td>
+                        <td class="p-3 pr-4 text-right"><button class="delete-gallery-btn text-danger hover:text-red-400 font-medium" data-id="${doc.id}">Sil</button></td>
+                    </tr>
+                `;
+            });
+            document.querySelectorAll('.delete-gallery-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if(confirm("Bu içeriği galeriden silmek istiyor musun?")) await deleteDoc(doc(db, "gallery", e.target.getAttribute('data-id')));
+                });
+            });
+        });
+
+        const userList = document.getElementById('user-list');
+        document.getElementById('addUserBtn').addEventListener('click', async () => {
+            const user = document.getElementById('u-name').value;
+            const pass = document.getElementById('u-pass').value;
+            const role = document.getElementById('u-role').value;
+            if (user && pass) {
+                try {
+                    await addDoc(collection(db, "users"), { username: user, password: pass, role: role, bio: "", bubbleColor: "#5865F2" });
+                    alert("Siteye Üye Eklendi!");
+                    document.getElementById('u-name').value = ''; document.getElementById('u-pass').value = '';
+                } catch (e) { alert("Hata: " + e.message); }
+            }
+        });
+
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            userList.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                userList.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                        <td class="p-3 pl-4 flex items-center gap-2">
+                            <img src="https://minotar.net/helm/${data.username}/24.png" class="rounded">
+                            <span class="dark:text-white font-medium">${data.username}</span>
+                        </td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-xs font-bold ${data.role === 'Admin' ? 'bg-blurple/20 text-blurple' : 'bg-gray-200 dark:bg-white/10 text-gray-500'}">${data.role}</span></td>
+                        <td class="p-3 text-xs text-gray-400 font-mono">${data.password}</td>
+                        <td class="p-3 pr-4 text-right"><button class="delete-user-btn text-danger hover:text-red-400 font-medium" data-id="${doc.id}">Sil</button></td>
+                    </tr>
+                `;
+            });
+            document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if(confirm("Üyeyi tamamen silmek istiyor musun?")) await deleteDoc(doc(db, "users", e.target.getAttribute('data-id')));
+                });
+            });
+        });
+
+        const teamList = document.getElementById('team-list');
+        document.getElementById('addTeamBtn').addEventListener('click', async () => {
+            const tName = document.getElementById('team-name').value;
+            const tRole = document.getElementById('team-role').value;
+            if (tName && tRole) {
+                try {
+                    await addDoc(collection(db, "team"), { username: tName, role: tRole, timestamp: new Date() });
+                    alert("Kişi Ana Sayfadaki Ekibe Eklendi!");
+                    document.getElementById('team-name').value = '';
+                } catch (e) { alert("Hata: " + e.message); }
+            } else { alert("Kullanıcı adı boş bırakılamaz."); }
+        });
+
+        onSnapshot(collection(db, "team"), (snapshot) => {
+            teamList.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                teamList.innerHTML += `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition">
+                        <td class="p-3 pl-4 flex items-center gap-2">
+                            <img src="https://minotar.net/helm/${data.username}/24.png" class="rounded">
+                            <span class="dark:text-white font-medium">${data.username}</span>
+                        </td>
+                        <td class="p-3 dark:text-gray-300">${data.role}</td>
+                        <td class="p-3 pr-4 text-right"><button class="delete-team-btn text-danger hover:text-red-400 font-medium" data-id="${doc.id}">Kaldır</button></td>
+                    </tr>
+                `;
+            });
+            document.querySelectorAll('.delete-team-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if(confirm("Bu kişiyi ana sayfadaki ekipten kaldırmak istiyor musun?")) await deleteDoc(doc(db, "team", e.target.getAttribute('data-id')));
+                });
+            });
+        });
+    </script>
+
+    <script>
+        if (localStorage.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (!('theme' in localStorage)) localStorage.theme = 'light';
+        }
+
+        window.toggleTheme = function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
+        window.switchTab = function(tab) {
+            document.getElementById('tab-gallery').classList.add('hidden');
+            document.getElementById('tab-users').classList.add('hidden');
+            document.getElementById('tab-team').classList.add('hidden');
+            
+            const inactiveClass = "flex-1 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 transition whitespace-nowrap text-sm md:text-base font-medium";
+            const activeClass = "flex-1 md:w-full flex items-center justify-center md:justify-start gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg bg-blurple text-white transition whitespace-nowrap text-sm md:text-base font-medium";
+
+            document.getElementById('btn-gallery').className = inactiveClass;
+            document.getElementById('btn-users').className = inactiveClass;
+            document.getElementById('btn-team').className = inactiveClass;
+
+            if(tab === 'gallery') {
+                document.getElementById('tab-gallery').classList.remove('hidden');
+                document.getElementById('btn-gallery').className = activeClass;
+                document.getElementById('page-title').innerText = "Galeri Yönetimi";
+            } else if(tab === 'users') {
+                document.getElementById('tab-users').classList.remove('hidden');
+                document.getElementById('btn-users').className = activeClass;
+                document.getElementById('page-title').innerText = "Üye Yönetimi";
+            } else if(tab === 'team') {
+                document.getElementById('tab-team').classList.remove('hidden');
+                document.getElementById('btn-team').className = activeClass;
+                document.getElementById('page-title').innerText = "Ekip Yönetimi";
+            }
+        }
+    </script>
+</body>
+</html>
