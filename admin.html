@@ -105,15 +105,12 @@
     </main>
 
     <script type="module">
-        // Firebase dosyasını içe aktar
         import { db } from './firebase.js';
         import { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } 
         from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- GALERİ İŞLEMLERİ ---
         const galleryList = document.getElementById('gallery-list');
         
-        // Veri Ekleme
         document.getElementById('addGalleryBtn').addEventListener('click', async () => {
             const date = document.getElementById('g-date').value;
             const title = document.getElementById('g-title').value;
@@ -127,10 +124,9 @@
                         title: title,
                         image: img,
                         description: desc,
-                        timestamp: new Date() // Sıralama için
+                        timestamp: new Date()
                     });
                     alert("Başarıyla eklendi!");
-                    // Inputları temizle
                     document.getElementById('g-date').value = '';
                     document.getElementById('g-title').value = '';
                     document.getElementById('g-img').value = '';
@@ -144,7 +140,6 @@
             }
         });
 
-        // Verileri Canlı Dinle (Listele)
         onSnapshot(collection(db, "gallery"), (snapshot) => {
             galleryList.innerHTML = '';
             snapshot.forEach((doc) => {
@@ -162,7 +157,6 @@
                 galleryList.innerHTML += row;
             });
 
-            // Silme Butonlarına Event Ekle
             document.querySelectorAll('.delete-gallery-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     if(confirm("Silmek istediğine emin misin?")) {
@@ -172,7 +166,6 @@
             });
         });
 
-        // --- ÜYE İŞLEMLERİ ---
         const userList = document.getElementById('user-list');
 
         document.getElementById('addUserBtn').addEventListener('click', async () => {
@@ -228,10 +221,24 @@
     </script>
 
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+        // --- TEMA AYARLARI (Varsayılan Beyaz Tema) ---
+        if (localStorage.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            if (!('theme' in localStorage)) {
+                localStorage.theme = 'light';
+            }
+        }
+
         window.toggleTheme = function() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
         }
 
         window.switchTab = function(tab) {
