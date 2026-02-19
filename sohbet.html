@@ -39,7 +39,7 @@
         .color-option.selected { border-color: white; box-shadow: 0 0 0 2px #5865F2; }
     </style>
 </head>
-<body class="bg-white dark:bg-dark-bg antialiased h-screen overflow-hidden flex flex-col transition-colors duration-500">
+<body class="bg-white dark:bg-dark-bg antialiased h-[100dvh] overflow-hidden flex flex-col transition-colors duration-500">
 
     <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-xl transition-all duration-700 p-4">
         <div class="bg-white dark:bg-dark-sidebar p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border border-gray-100 dark:border-white/5">
@@ -100,7 +100,7 @@
         
         <div class="flex-1 flex flex-col h-full relative bg-white dark:bg-dark-chat">
             
-            <header class="h-16 border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-3 md:px-4 bg-white/80 dark:bg-dark-chat/80 backdrop-blur-md sticky top-0 z-10">
+            <header class="h-16 border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-3 md:px-4 bg-white/80 dark:bg-dark-chat/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
                 <a href="/" class="flex items-center gap-2 text-gray-500 hover:text-blurple dark:text-gray-400 dark:hover:text-white transition group">
                     <svg class="w-5 h-5 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     <span class="hidden md:inline font-medium">Ana Sayfa</span>
@@ -144,16 +144,18 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 space-y-6 pb-24" id="chatContainer">
+            <main class="flex-1 overflow-y-auto p-4 space-y-6" id="chatContainer">
                 <div class="text-center text-xs text-gray-400 font-medium my-4">Bugün</div>
                 <div class="flex justify-center text-gray-500 text-sm">Sohbet yükleniyor...</div>
             </main>
 
-            <footer class="p-3 md:p-4 bg-white dark:bg-dark-chat border-t border-gray-100 dark:border-white/5 sticky bottom-0 z-10 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-none">
-                <div class="flex items-center gap-2 md:gap-3">
-                    <input type="text" id="chatInput" placeholder="Mesaj gönder..." class="flex-1 bg-gray-100 dark:bg-dark-input border-none rounded-full px-4 py-3 text-sm dark:text-white focus:ring-2 focus:ring-blurple transition placeholder-gray-500" onkeypress="handleEnter(event)">
-                    <button onclick="sendMessage()" class="bg-blurple text-white p-3 rounded-full hover:opacity-90 transition transform active:scale-95"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></button>
-                </div>
+            <footer class="p-3 md:p-4 bg-white dark:bg-dark-chat border-t border-gray-100 dark:border-white/5 shrink-0 z-10 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-none">
+                <form onsubmit="handleChatSubmit(event)" class="flex items-center gap-2 md:gap-3">
+                    <input type="text" id="chatInput" autocomplete="off" placeholder="Mesaj gönder..." class="flex-1 bg-gray-100 dark:bg-dark-input border-none rounded-full px-4 py-3 text-sm dark:text-white focus:ring-2 focus:ring-blurple transition placeholder-gray-500">
+                    <button type="submit" class="bg-blurple text-white p-3 rounded-full hover:opacity-90 transition transform active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                </form>
             </footer>
         </div>
         
@@ -342,22 +344,24 @@
             chatArea.scrollTop = chatArea.scrollHeight;
         });
 
-        window.sendMessage = async function() {
+        // YENİLİK: Artık form submit edildiğinde mesaj gönderiliyor
+        window.handleChatSubmit = async function(e) {
+            e.preventDefault(); // Sayfanın yenilenmesini engeller
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (text && currentUserData) {
-                await addDoc(collection(db, "chat"), {
-                    text: text,
-                    sender: currentUserData.username,
-                    role: currentUserData.role,
-                    timestamp: new Date()
-                });
-                input.value = '';
+                try {
+                    await addDoc(collection(db, "chat"), {
+                        text: text,
+                        sender: currentUserData.username,
+                        role: currentUserData.role,
+                        timestamp: new Date()
+                    });
+                    input.value = '';
+                } catch(error) {
+                    console.error("Mesaj hatası:", error);
+                }
             }
-        }
-
-        window.handleEnter = function(e) {
-            if(e.key === 'Enter') sendMessage();
         }
 
         checkLogin();
