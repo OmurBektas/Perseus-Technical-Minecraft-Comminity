@@ -1,3 +1,21 @@
+// --------------------------------------------------------------------------
+// FIREBASE FIRESTORE CANLI VERİ TABANI YAPILANDIRMASI
+// --------------------------------------------------------------------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCc8-jBAz-1JtfMCPTeAIxyeYoMFfxT0Tw",
+  authDomain: "ptech-website-150c5.firebaseapp.com",
+  projectId: "ptech-website-150c5",
+  storageBucket: "ptech-website-150c5.firebasestorage.app",
+  messagingSenderId: "537877075508",
+  appId: "1:537877075508:web:29af9a556dfb2425cddc61"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 // 1. CANLI SAYAÇ (07/07/2025)
 const startDate = new Date("2025-07-07T00:00:00").getTime();
 
@@ -21,13 +39,19 @@ function updateTimer() {
 setInterval(updateTimer, 1000);
 updateTimer();
 
-// 2. DISCORD LİNKİ SENKRONİZASYONU (Sunucu Davet Linki)
-function syncDiscordLinks() {
-  const savedDiscord = localStorage.getItem("perseus_discord_url");
-  if (savedDiscord) {
-    document.querySelectorAll('a[href*="discord.gg"]').forEach(btn => {
-      btn.href = savedDiscord;
-    });
+// 2. DISCORD LİNKİ YÜKLEME (Firebase'den)
+async function syncDiscordLinks() {
+  try {
+    const docRef = doc(db, "settings", "general");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists() && docSnap.data().discordUrl) {
+      const discordUrl = docSnap.data().discordUrl;
+      document.querySelectorAll('a[href*="discord.gg"]').forEach(btn => {
+        btn.href = discordUrl;
+      });
+    }
+  } catch (e) {
+    console.error("Discord linki yüklenemedi:", e);
   }
 }
 
@@ -70,86 +94,89 @@ async function loadServerStats() {
   }
 }
 
-// 4. ADMIN PANELİNDEN EKLENEN EKİP VE GALERİ VERİLERİNİ YÜKLEME
-function loadDynamicTeamAndGallery() {
+// 4. FIREBASE'DEN EKİP VE GALERİ VERİLERİNİ YÜKLEME
+async function loadDynamicTeamAndGallery() {
   const teamContainer = document.getElementById("teamContainer");
-  const customTeam = JSON.parse(localStorage.getItem("custom_team_db") || "[]");
-  const socialsDb = JSON.parse(localStorage.getItem("player_socials_db") || "{}");
+  const galleryContainer = document.getElementById("galleryContainer");
 
+  // Ekip Yükleme
   if (teamContainer) {
-    let teamHtml = "";
+    try {
+      const teamSnap = await getDocs(collection(db, "team"));
+      let teamHtml = "";
 
-    if (customTeam.length === 0) {
-      teamHtml = `<p style="color: #94a3b8; text-align: center;">Henüz ekip üyesi eklenmedi.</p>`;
-    } else {
-      customTeam.forEach(m => {
-        const pSocials = socialsDb[m.name.toLowerCase()] || {};
-        
-        // Dolu olan en az 1 sosyal medya bağlantısı var mı kontrol et
-        const hasAnySocial = Boolean(
-          (pSocials.discord && pSocials.discord.trim()) ||
-          (pSocials.namemc && pSocials.namemc.trim()) ||
-          (pSocials.youtube && pSocials.youtube.trim()) ||
-          (pSocials.instagram && pSocials.instagram.trim()) ||
-          (pSocials.twitch && pSocials.twitch.trim()) ||
-          (pSocials.kick && pSocials.kick.trim())
-        );
+      if (teamSnap.empty) {
+        teamHtml = `<p style="color: #94a3b8; text-align: center;">Henüz ekip üyesi eklenmedi.</p>`;
+      } else {
+        teamSnap.forEach(docSnap => {
+          const m = docSnap.data();
+          const pSocials = m.socials || {};
+          
+          const hasAnySocial = Boolean(
+            (pSocials.discord && pSocials.discord.trim()) ||
+            (pSocials.namemc && pSocials.namemc.trim()) ||
+            (pSocials.youtube && pSocials.youtube.trim()) ||
+            (pSocials.instagram && pSocials.instagram.trim()) ||
+            (pSocials.twitch && pSocials.twitch.trim()) ||
+            (pSocials.kick && pSocials.kick.trim())
+          );
 
-        if (hasAnySocial) {
-          teamHtml += `
-            <div class="team-card" onclick="openPlayerCardModal('${m.name}', '${m.role}')" style="cursor: pointer;">
-              <img src="https://mc-heads.net/avatar/${m.name}/100" alt="${m.name}" class="skin-head">
-              <h3>${m.name}</h3>
-              <span class="role-badge founder" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;">${m.role}</span>
-              <div class="click-info">Detaylar için tıkla</div>
-            </div>
-          `;
-        } else {
-          // Hiçbir verisi yoksa kart tıklanamaz yapılır ve bilgi yazısı gizlenir
-          teamHtml += `
-            <div class="team-card" style="cursor: default;">
-              <img src="https://mc-heads.net/avatar/${m.name}/100" alt="${m.name}" class="skin-head">
-              <h3>${m.name}</h3>
-              <span class="role-badge founder" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;">${m.role}</span>
+          if (hasAnySocial) {
+            teamHtml += `
+              <div class="team-card" onclick="openPlayerCardModal('${m.name}', '${m.role}', ${JSON.stringify(pSocials).replace(/"/g, '&quot;')})" style="cursor: pointer;">
+                <img src="https://mc-heads.net/avatar/${m.name}/100" alt="${m.name}" class="skin-head">
+                <h3>${m.name}</h3>
+                <span class="role-badge founder" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;">${m.role}</span>
+                <div class="click-info">Detaylar için tıkla</div>
+              </div>
+            `;
+          } else {
+            teamHtml += `
+              <div class="team-card" style="cursor: default;">
+                <img src="https://mc-heads.net/avatar/${m.name}/100" alt="${m.name}" class="skin-head">
+                <h3>${m.name}</h3>
+                <span class="role-badge founder" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;">${m.role}</span>
+              </div>
+            `;
+          }
+        });
+      }
+      teamContainer.innerHTML = teamHtml;
+    } catch (e) {
+      console.error("Ekip verisi çekilemedi:", e);
+    }
+  }
+
+  // Galeri Yükleme
+  if (galleryContainer) {
+    try {
+      const gallerySnap = await getDocs(collection(db, "gallery"));
+      galleryContainer.innerHTML = "";
+      
+      gallerySnap.forEach(docSnap => {
+        const g = docSnap.data();
+        if (g.showOnHome) {
+          galleryContainer.innerHTML += `
+            <div class="gallery-card" onclick="window.location.href='gallery/index.html'">
+              <div class="gallery-img-wrapper">
+                <img src="${g.thumbnail || g.url}" alt="${g.title}">
+              </div>
+              <div class="gallery-info">
+                <h3>${g.title}</h3>
+                <p>${g.desc || ''}</p>
+              </div>
             </div>
           `;
         }
       });
-    }
-
-    teamContainer.innerHTML = teamHtml;
-  }
-
-  const galleryContainer = document.getElementById("galleryContainer");
-  const customGallery = JSON.parse(localStorage.getItem("custom_gallery_db") || "[]");
-
-  if (galleryContainer) {
-    const homeItems = customGallery.filter(g => g.showOnHome);
-
-    if (homeItems.length > 0) {
-      galleryContainer.innerHTML = "";
-      homeItems.forEach(g => {
-        galleryContainer.innerHTML += `
-          <div class="gallery-card" onclick="window.location.href='gallery/index.html'">
-            <div class="gallery-img-wrapper">
-              <img src="${g.thumbnail || g.url}" alt="${g.title}">
-            </div>
-            <div class="gallery-info">
-              <h3>${g.title}</h3>
-              <p>${g.desc || ''}</p>
-            </div>
-          </div>
-        `;
-      });
+    } catch (e) {
+      console.error("Galeri verisi çekilemedi:", e);
     }
   }
 }
 
-// 5. OYUNCU BİLGİ KARTINI AÇMA MODALI (Sadece Girilen Alanlar Görünür)
-function openPlayerCardModal(playerName, role) {
-  const db = JSON.parse(localStorage.getItem("player_socials_db") || "{}");
-  const playerSocials = db[playerName.toLowerCase()] || {};
-
+// 5. OYUNCU BİLGİ KARTINI AÇMA MODALI
+window.openPlayerCardModal = function(playerName, role, playerSocials = {}) {
   let modal = document.getElementById("playerCardModal");
   if (!modal) {
     modal = document.createElement("div");
@@ -160,7 +187,6 @@ function openPlayerCardModal(playerName, role) {
 
   let socialRowsHtml = "";
 
-  // Discord Kullanıcı Adı
   if (playerSocials.discord && playerSocials.discord.trim()) {
     socialRowsHtml += `
       <div class="social-row-item discord-copy-item" onclick="copyDiscordTag('${playerSocials.discord.trim()}')">
@@ -176,7 +202,6 @@ function openPlayerCardModal(playerName, role) {
     `;
   }
 
-  // NameMC Linki
   if (playerSocials.namemc && playerSocials.namemc.trim()) {
     socialRowsHtml += `
       <a href="${playerSocials.namemc.trim()}" target="_blank" class="social-row-item">
@@ -192,7 +217,6 @@ function openPlayerCardModal(playerName, role) {
     `;
   }
 
-  // YouTube
   if (playerSocials.youtube && playerSocials.youtube.trim()) {
     socialRowsHtml += `
       <a href="${playerSocials.youtube.trim()}" target="_blank" class="social-row-item">
@@ -201,7 +225,6 @@ function openPlayerCardModal(playerName, role) {
     `;
   }
 
-  // Instagram
   if (playerSocials.instagram && playerSocials.instagram.trim()) {
     socialRowsHtml += `
       <a href="${playerSocials.instagram.trim()}" target="_blank" class="social-row-item">
@@ -210,7 +233,6 @@ function openPlayerCardModal(playerName, role) {
     `;
   }
 
-  // Twitch
   if (playerSocials.twitch && playerSocials.twitch.trim()) {
     socialRowsHtml += `
       <a href="${playerSocials.twitch.trim()}" target="_blank" class="social-row-item">
@@ -219,7 +241,6 @@ function openPlayerCardModal(playerName, role) {
     `;
   }
 
-  // Kick
   if (playerSocials.kick && playerSocials.kick.trim()) {
     socialRowsHtml += `
       <a href="${playerSocials.kick.trim()}" target="_blank" class="social-row-item">
@@ -246,14 +267,14 @@ function openPlayerCardModal(playerName, role) {
 
   modal.style.display = "flex";
   modal.onclick = closePlayerCardModal;
-}
+};
 
-function closePlayerCardModal() {
+window.closePlayerCardModal = function() {
   const modal = document.getElementById("playerCardModal");
   if (modal) modal.style.display = "none";
-}
+};
 
-function copyDiscordTag(tag) {
+window.copyDiscordTag = function(tag) {
   if (!tag) return;
   navigator.clipboard.writeText(tag).then(() => {
     const btn = document.getElementById("dcCopyBtn");
@@ -268,7 +289,7 @@ function copyDiscordTag(tag) {
       }, 2000);
     }
   });
-}
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   syncDiscordLinks();
@@ -279,7 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // 6. ADMIN PANELİNE GİRİŞ KISAYOLU (F8 veya Ctrl + Shift + P)
 document.addEventListener("keydown", function(e) {
   const isShortcut = (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') || e.key === 'F8';
-  
   if (isShortcut) {
     e.preventDefault();
     window.location.href = "admin/index.html";
