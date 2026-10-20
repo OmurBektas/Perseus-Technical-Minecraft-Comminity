@@ -60,13 +60,12 @@
     .admin-list-item {
       display: flex; align-items: center; justify-content: space-between;
       padding: 0.9rem 1.2rem; border: 1px solid #e2e8f0; border-radius: 14px;
-      margin-bottom: 0.8rem; background: #f8fafc; cursor: grab; transition: transform 0.15s, box-shadow 0.15s;
+      margin-bottom: 0.8rem; background: #f8fafc; transition: transform 0.15s, box-shadow 0.15s;
     }
-    .admin-list-item:active { cursor: grabbing; transform: scale(0.99); }
     .admin-list-item.disabled-item { opacity: 0.55; background: #f1f5f9; border-style: dashed; }
 
-    .item-info { display: flex; align-items: center; gap: 1rem; }
-    .item-info img { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; }
+    .item-info { display: flex; align-items: center; gap: 1rem; flex: 1; }
+    .item-info img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
     .item-title { font-weight: 700; color: #0f172a; font-size: 0.95rem; }
     .item-sub { font-size: 0.8rem; color: #64748b; }
 
@@ -123,7 +122,7 @@
   <div id="dashboardSection" class="admin-container" style="display: none;">
     <div class="section-header" style="text-align: left; margin-bottom: 1.5rem;">
       <h2>Yönetim Paneli</h2>
-      <p class="section-sub">Canlı veri tabanı aktif. Sürükleyerek veya ok tuşlarıyla sıralamayı değiştirebilirsiniz.</p>
+      <p class="section-sub">Canlı veri tabanı aktif. Tüm ekip ve galeri içeriklerinizi buradan yönetebilirsiniz.</p>
     </div>
 
     <div class="dashboard-grid">
@@ -181,10 +180,8 @@
           <button class="admin-btn" id="btnSaveTeam">Ekip Üyesini Kaydet</button>
           
           <hr style="margin: 2rem 0; border: none; border-top: 1px solid #f1f5f9;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h4 style="margin:0;">Kayıtlı Ekip Kadrosu (Sıralamayı Değiştirebilirsiniz)</h4>
-          </div>
-          <div id="teamList"></div>
+          <h4>Kayıtlı Ekip Kadrosu (Sıralamayı Değiştirebilirsiniz)</h4>
+          <div id="teamList" style="margin-top: 1rem;"></div>
         </div>
 
         <!-- GALERİ YÖNETİMİ -->
@@ -214,6 +211,10 @@
                 <input type="date" id="galleryDate" class="admin-field">
               </div>
             </div>
+            <div class="admin-input-group" id="thumbGroup" style="display: none;">
+              <label>Özel Kapak Resmi URL (Boş bırakılırsa YouTube'dan otomatik çekilir)</label>
+              <input type="text" id="galleryThumbUrl" class="admin-field" placeholder="https://...">
+            </div>
             <div class="admin-input-group">
               <label>Açıklama</label>
               <input type="text" id="galleryDesc" class="admin-field" placeholder="Açıklama...">
@@ -224,6 +225,7 @@
             </div>
           </div>
           <button class="admin-btn" id="btnSaveGallery">Medyayı Yayınla</button>
+          
           <hr style="margin: 2rem 0; border: none; border-top: 1px solid #f1f5f9;">
           <h4>Kayıtlı Medyalar</h4>
           <div id="galleryList" style="margin-top: 1rem;"></div>
@@ -277,6 +279,60 @@
     </div>
   </div>
 
+  <!-- GALERİ MEDYA DÜZENLEME MODALI -->
+  <div id="editGalleryModal" class="edit-modal-overlay" style="display: none;">
+    <div class="edit-modal-box">
+      <div class="card-title-bar" style="margin-bottom: 1rem;">
+        <h3>Medya İçeriğini Düzenle</h3>
+        <button class="btn-action btn-delete" id="btnCloseEditGalleryModal">✕ Kapat</button>
+      </div>
+
+      <input type="hidden" id="editGalleryDocId">
+
+      <div class="admin-input-group">
+        <label>Başlık</label>
+        <input type="text" id="editGalleryTitle" class="admin-field">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="admin-input-group">
+          <label>Medya Türü</label>
+          <select id="editGalleryType" class="admin-field">
+            <option value="image">Fotoğraf (Görsel URL)</option>
+            <option value="video">Video (YouTube / MP4)</option>
+          </select>
+        </div>
+        <div class="admin-input-group">
+          <label>Medya URL</label>
+          <input type="text" id="editGalleryUrl" class="admin-field">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="admin-input-group">
+          <label>Kapak Resmi URL (İsteğe Bağlı)</label>
+          <input type="text" id="editGalleryThumb" class="admin-field">
+        </div>
+        <div class="admin-input-group">
+          <label>Tarih</label>
+          <input type="date" id="editGalleryDate" class="admin-field">
+        </div>
+      </div>
+
+      <div class="admin-input-group">
+        <label>Açıklama</label>
+        <textarea id="editGalleryDesc" class="admin-field" style="height: 80px; resize: vertical;"></textarea>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem;">
+        <input type="checkbox" id="editGalleryShowOnHome" style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="editGalleryShowOnHome" style="font-weight: 700; color: #0f172a; font-size: 0.9rem; cursor: pointer;">Ana Sayfada Göster</label>
+      </div>
+
+      <button class="admin-btn" id="btnUpdateGalleryItem">Değişiklikleri Kaydet</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -295,6 +351,19 @@
     const ADMIN_PASS = "1234";
 
     let teamDataArray = [];
+
+    function getYoutubeThumbnail(url) {
+      if (!url) return null;
+      let videoId = null;
+      if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1]?.split('&')[0];
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('embed/')[1]?.split('?')[0];
+      }
+      return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+    }
 
     document.getElementById("btnLogin").addEventListener("click", () => {
       const pass = document.getElementById("adminPassword").value;
@@ -319,6 +388,10 @@
       renderTeamList();
       renderGalleryList();
     }
+
+    document.getElementById("galleryType").addEventListener("change", (e) => {
+      document.getElementById("thumbGroup").style.display = e.target.value === 'video' ? 'block' : 'none';
+    });
 
     document.getElementById("btnNavDiscord").addEventListener("click", (e) => switchTab('discord', e.currentTarget));
     document.getElementById("btnNavTeam").addEventListener("click", (e) => switchTab('team', e.currentTarget));
@@ -398,7 +471,6 @@
         teamDataArray.push({ id: docSnap.id, ...docSnap.data() });
       });
 
-      // Sıralama
       teamDataArray.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
       teamDataArray.forEach((m, index) => {
@@ -406,7 +478,6 @@
         const item = document.createElement("div");
         item.className = `admin-list-item ${isOff ? 'disabled-item' : ''}`;
         item.draggable = true;
-        item.dataset.index = index;
 
         item.innerHTML = `
           <div class="item-info">
@@ -426,7 +497,6 @@
           </div>
         `;
 
-        // Buton Olayları
         item.querySelector(".btn-up").addEventListener("click", () => moveTeamItem(index, -1));
         item.querySelector(".btn-down").addEventListener("click", () => moveTeamItem(index, 1));
         item.querySelector(".btn-toggle-active").addEventListener("click", () => toggleTeamActive(m.id, !isOff));
@@ -438,7 +508,6 @@
           }
         });
 
-        // Drag & Drop
         item.addEventListener("dragstart", (e) => e.dataTransfer.setData("text/plain", index));
         item.addEventListener("dragover", (e) => e.preventDefault());
         item.addEventListener("drop", (e) => {
@@ -477,7 +546,6 @@
       renderTeamList();
     }
 
-    // DÜZENLEME MODALI
     function openEditTeamModal(member) {
       document.getElementById("editMemberDocId").value = member.id;
       document.getElementById("editMemberName").value = member.name || "";
@@ -519,6 +587,7 @@
       const title = document.getElementById("galleryTitle").value.trim();
       const type = document.getElementById("galleryType").value;
       const url = document.getElementById("galleryImgUrl").value.trim();
+      let thumb = document.getElementById("galleryThumbUrl").value.trim();
       const desc = document.getElementById("galleryDesc").value.trim();
       const showOnHome = document.getElementById("galleryShowOnHome").checked;
       const dateVal = document.getElementById("galleryDate").value;
@@ -526,14 +595,26 @@
       if (!title || !url) return alert("Başlık ve URL zorunludur!");
       let selectedDate = dateVal ? new Date(dateVal) : new Date();
 
+      if (!thumb && type === 'video') {
+        thumb = getYoutubeThumbnail(url);
+      }
+
       const id = "img_" + Date.now();
       await setDoc(doc(db, "gallery", id), {
-        title, type, url, desc, showOnHome,
+        title, type, url,
+        thumbnail: thumb,
+        desc, showOnHome,
         date: selectedDate.toLocaleDateString('tr-TR'),
+        isoDate: selectedDate.toISOString().split('T')[0],
         timestamp: selectedDate.getTime()
       });
 
       alert("Medya kaydedildi!");
+      document.getElementById("galleryTitle").value = "";
+      document.getElementById("galleryImgUrl").value = "";
+      document.getElementById("galleryThumbUrl").value = "";
+      document.getElementById("galleryDesc").value = "";
+      document.getElementById("galleryShowOnHome").checked = false;
       renderGalleryList();
     });
 
@@ -543,29 +624,101 @@
       const snap = await getDocs(collection(db, "gallery"));
       container.innerHTML = "";
 
+      if (snap.empty) {
+        container.innerHTML = "<p style='font-size:0.85rem; color:#94a3b8;'>Henüz medya yok.</p>";
+        return;
+      }
+
+      let items = [];
       snap.forEach(docSnap => {
-        const g = docSnap.data();
+        items.push({ id: docSnap.id, ...docSnap.data() });
+      });
+
+      items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+      items.forEach(g => {
+        let displayThumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
+        if (!displayThumb) displayThumb = g.url;
+
+        const homeTag = g.showOnHome ? '<span style="color:#2563eb; font-weight:800; font-size:0.75rem;"> [Ana Sayfa]</span>' : '';
+
         const item = document.createElement("div");
         item.className = "admin-list-item";
         item.innerHTML = `
           <div class="item-info">
-            <img src="${g.url}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
+            <img src="${displayThumb}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
             <div>
-              <div class="item-title">${g.title} ${g.showOnHome ? '[Ana Sayfa]' : ''}</div>
-              <div class="item-sub">${g.desc || ''} - ${g.date || ''}</div>
+              <div class="item-title">${g.title} ${homeTag}</div>
+              <div class="item-sub">${g.desc || 'Açıklama yok'} - <b>${g.date || ''}</b></div>
             </div>
           </div>
-          <button class="btn-action btn-delete">Sil</button>
+          <div class="action-group">
+            <button class="btn-action btn-edit">Düzenle</button>
+            <button class="btn-action btn-delete">Sil</button>
+          </div>
         `;
+
+        item.querySelector(".btn-edit").addEventListener("click", () => openEditGalleryModal(g));
         item.querySelector(".btn-delete").addEventListener("click", async () => {
-          if (confirm("Silinsin mi?")) {
-            await deleteDoc(doc(db, "gallery", docSnap.id));
+          if (confirm("Bu medya silinsin mi?")) {
+            await deleteDoc(doc(db, "gallery", g.id));
             renderGalleryList();
           }
         });
+
         container.appendChild(item);
       });
     }
+
+    // GALERİ DÜZENLEME MODAL İŞLEMLERİ
+    function openEditGalleryModal(item) {
+      document.getElementById("editGalleryDocId").value = item.id;
+      document.getElementById("editGalleryTitle").value = item.title || "";
+      document.getElementById("editGalleryType").value = item.type || "image";
+      document.getElementById("editGalleryUrl").value = item.url || "";
+      document.getElementById("editGalleryThumb").value = item.thumbnail || "";
+      document.getElementById("editGalleryDesc").value = item.desc || "";
+      document.getElementById("editGalleryShowOnHome").checked = !!item.showOnHome;
+      if (item.isoDate) document.getElementById("editGalleryDate").value = item.isoDate;
+
+      document.getElementById("editGalleryModal").style.display = "flex";
+    }
+
+    document.getElementById("btnCloseEditGalleryModal").addEventListener("click", () => {
+      document.getElementById("editGalleryModal").style.display = "none";
+    });
+
+    document.getElementById("btnUpdateGalleryItem").addEventListener("click", async () => {
+      const docId = document.getElementById("editGalleryDocId").value;
+      const title = document.getElementById("editGalleryTitle").value.trim();
+      const type = document.getElementById("editGalleryType").value;
+      const url = document.getElementById("editGalleryUrl").value.trim();
+      let thumb = document.getElementById("editGalleryThumb").value.trim();
+      const desc = document.getElementById("editGalleryDesc").value.trim();
+      const showOnHome = document.getElementById("editGalleryShowOnHome").checked;
+      const dateVal = document.getElementById("editGalleryDate").value;
+
+      if (!title || !url) return alert("Başlık ve URL zorunludur!");
+
+      let selectedDate = dateVal ? new Date(dateVal) : new Date();
+
+      if (!thumb && type === 'video') {
+        thumb = getYoutubeThumbnail(url);
+      }
+
+      await updateDoc(doc(db, "gallery", docId), {
+        title, type, url,
+        thumbnail: thumb,
+        desc, showOnHome,
+        date: selectedDate.toLocaleDateString('tr-TR'),
+        isoDate: selectedDate.toISOString().split('T')[0],
+        timestamp: selectedDate.getTime()
+      });
+
+      alert("Medya güncellendi!");
+      document.getElementById("editGalleryModal").style.display = "none";
+      renderGalleryList();
+    });
 
     if (sessionStorage.getItem("admin_auth") === "true") {
       showDashboard();
