@@ -16,20 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-function getYoutubeThumbnail(url) {
-  if (!url) return null;
-  let videoId = null;
-  if (url.includes('youtube.com/watch?v=')) {
-    videoId = url.split('v=')[1]?.split('&')[0];
-  } else if (url.includes('youtu.be/')) {
-    videoId = url.split('youtu.be/')[1]?.split('?')[0];
-  } else if (url.includes('youtube.com/embed/')) {
-    videoId = url.split('embed/')[1]?.split('?')[0];
-  }
-  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
-}
-
-// 1. CANLI SAYAÇ (07/07/2025)
+// 1. CANLI SAYAÇ
 const startDate = new Date("2025-07-07T00:00:00").getTime();
 
 function updateTimer() {
@@ -64,11 +51,11 @@ async function syncDiscordLinks() {
       });
     }
   } catch (e) {
-    console.error("Discord linki yüklenemedi:", e);
+    console.error(e);
   }
 }
 
-// 3. CANLI İSTATİSTİK YÜKLEYİCİ (Ana Sayfa Top 3)
+// 3. SKOR TABLOSU
 async function loadServerStats() {
   try {
     const response = await fetch('stats.json');
@@ -79,14 +66,12 @@ async function loadServerStats() {
 
     if (topList && Array.isArray(data)) {
       topList.innerHTML = "";
-      
       data.slice(0, 3).forEach((player, index) => {
-        const rankClass = `rank-${index + 1}`;
         const playerName = player.name || player.uuid || "Oyuncu";
         const digsCount = player.digs ? player.digs.toLocaleString() : 0;
 
-        const itemHtml = `
-          <div class="leader-item ${rankClass}">
+        topList.innerHTML += `
+          <div class="leader-item rank-${index + 1}">
             <div class="rank-badge">${index + 1}</div>
             <img src="https://mc-heads.net/avatar/${playerName}/64" alt="${playerName}" class="leader-head">
             <div class="leader-details">
@@ -99,12 +84,9 @@ async function loadServerStats() {
             </div>
           </div>
         `;
-        topList.innerHTML += itemHtml;
       });
     }
-  } catch (error) {
-    console.error("Stats verisi çekilemedi:", error);
-  }
+  } catch (error) { console.error(error); }
 }
 
 // 4. FIREBASE'DEN EKİP VE GALERİ VERİLERİNİ YÜKLEME
@@ -112,19 +94,28 @@ async function loadDynamicTeamAndGallery() {
   const teamContainer = document.getElementById("teamContainer");
   const galleryContainer = document.getElementById("galleryContainer");
 
-  // Ekip Yükleme
+  // EKİP YÜKLEME (Sıralı & Sadece Aktif Olanlar)
   if (teamContainer) {
     try {
       const teamSnap = await getDocs(collection(db, "team"));
-      let teamHtml = "";
+      let teamMembers = [];
 
-      if (teamSnap.empty) {
+      teamSnap.forEach(docSnap => {
+        const m = docSnap.data();
+        if (m.active !== false) { // Sadece aktif üyeleri göster
+          teamMembers.push(m);
+        }
+      });
+
+      // Sıralamaya göre diz
+      teamMembers.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+
+      let teamHtml = "";
+      if (teamMembers.length === 0) {
         teamHtml = `<p style="color: #94a3b8; text-align: center;">Henüz ekip üyesi eklenmedi.</p>`;
       } else {
-        teamSnap.forEach(docSnap => {
-          const m = docSnap.data();
+        teamMembers.forEach(m => {
           const pSocials = m.socials || {};
-          
           const hasAnySocial = Boolean(
             (pSocials.discord && pSocials.discord.trim()) ||
             (pSocials.namemc && pSocials.namemc.trim()) ||
@@ -153,25 +144,21 @@ async function loadDynamicTeamAndGallery() {
         });
       }
       teamContainer.innerHTML = teamHtml;
-    } catch (e) {
-      console.error("Ekip verisi çekilemedi:", e);
-    }
+    } catch (e) { console.error(e); }
   }
 
-  // Galeri Yükleme (Ana Sayfa)
+  // GALERİ YÜKLEME
   if (galleryContainer) {
     try {
       const gallerySnap = await getDocs(collection(db, "gallery"));
       galleryContainer.innerHTML = "";
-      
       gallerySnap.forEach(docSnap => {
         const g = docSnap.data();
         if (g.showOnHome) {
-          let displayThumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
           galleryContainer.innerHTML += `
             <div class="gallery-card" onclick="window.location.href='gallery/index.html'">
               <div class="gallery-img-wrapper">
-                <img src="${displayThumb}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
+                <img src="${g.url}" alt="${g.title}">
               </div>
               <div class="gallery-info">
                 <h3>${g.title}</h3>
@@ -182,9 +169,7 @@ async function loadDynamicTeamAndGallery() {
           `;
         }
       });
-    } catch (e) {
-      console.error("Galeri verisi çekilemedi:", e);
-    }
+    } catch (e) { console.error(e); }
   }
 }
 
@@ -199,69 +184,35 @@ window.openPlayerCardModal = function(playerName, role, playerSocials = {}) {
   }
 
   let socialRowsHtml = "";
-
   if (playerSocials.discord && playerSocials.discord.trim()) {
     socialRowsHtml += `
       <div class="social-row-item discord-copy-item" onclick="copyDiscordTag('${playerSocials.discord.trim()}')">
-        <div class="social-icon-label">
-          <span class="icon">💬</span>
-          <div class="social-text-info">
-            <span class="social-title">Discord</span>
-            <span class="social-val" id="dcCopyVal">${playerSocials.discord.trim()}</span>
-          </div>
-        </div>
+        <div class="social-icon-label"><span class="icon">💬</span><div class="social-text-info"><span class="social-title">Discord</span><span class="social-val" id="dcCopyVal">${playerSocials.discord.trim()}</span></div></div>
         <button class="copy-btn" id="dcCopyBtn">Kopyala</button>
       </div>
     `;
   }
-
   if (playerSocials.namemc && playerSocials.namemc.trim()) {
-    socialRowsHtml += `
-      <a href="${playerSocials.namemc.trim()}" target="_blank" class="social-row-item">
-        <div class="social-icon-label">
-          <span class="icon">👤</span>
-          <div class="social-text-info">
-            <span class="social-title">NameMC Profil</span>
-            <span class="social-val">Skin ve isim geçmişi</span>
-          </div>
-        </div>
-        <span class="arrow">→</span>
-      </a>
-    `;
+    socialRowsHtml += `<a href="${playerSocials.namemc.trim()}" target="_blank" class="social-row-item"><div class="social-icon-label"><span class="icon">👤</span><div class="social-text-info"><span class="social-title">NameMC</span><span class="social-val">Profil</span></div></div><span class="arrow">→</span></a>`;
   }
-
   if (playerSocials.youtube && playerSocials.youtube.trim()) {
-    socialRowsHtml += `
-      <a href="${playerSocials.youtube.trim()}" target="_blank" class="social-row-item">
-        <div class="social-icon-label"><span class="icon">▶️</span><div class="social-text-info"><span class="social-title">YouTube</span><span class="social-val">Kanalı Gör</span></div></div><span class="arrow">→</span>
-      </a>
-    `;
+    socialRowsHtml += `<a href="${playerSocials.youtube.trim()}" target="_blank" class="social-row-item"><div class="social-icon-label"><span class="icon">▶️</span><div class="social-text-info"><span class="social-title">YouTube</span><span class="social-val">Kanal</span></div></div><span class="arrow">→</span></a>`;
   }
-
   if (playerSocials.instagram && playerSocials.instagram.trim()) {
-    socialRowsHtml += `
-      <a href="${playerSocials.instagram.trim()}" target="_blank" class="social-row-item">
-        <div class="social-icon-label"><span class="icon">📸</span><div class="social-text-info"><span class="social-title">Instagram</span><span class="social-val">Profili Gör</span></div></div><span class="arrow">→</span>
-      </a>
-    `;
+    socialRowsHtml += `<a href="${playerSocials.instagram.trim()}" target="_blank" class="social-row-item"><div class="social-icon-label"><span class="icon">📸</span><div class="social-text-info"><span class="social-title">Instagram</span><span class="social-val">Profil</span></div></div><span class="arrow">→</span></a>`;
   }
 
   modal.innerHTML = `
     <div class="player-card-modal" onclick="event.stopPropagation()">
       <button class="player-card-close" onclick="closePlayerCardModal()">✕</button>
-      
       <div class="player-card-header">
         <img src="https://mc-heads.net/avatar/${playerName}/100" alt="${playerName}" class="player-card-head">
         <h2>${playerName}</h2>
         <span class="role-badge founder" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; margin-top: 0.4rem;">${role}</span>
       </div>
-
-      <div class="player-socials-list">
-        ${socialRowsHtml}
-      </div>
+      <div class="player-socials-list">${socialRowsHtml}</div>
     </div>
   `;
-
   modal.style.display = "flex";
   modal.onclick = closePlayerCardModal;
 };
@@ -277,13 +228,7 @@ window.copyDiscordTag = function(tag) {
     const btn = document.getElementById("dcCopyBtn");
     if (btn) {
       btn.innerText = "Kopyalandı!";
-      btn.style.background = "#22c55e";
-      btn.style.color = "#ffffff";
-      setTimeout(() => {
-        btn.innerText = "Kopyala";
-        btn.style.background = "#f1f5f9";
-        btn.style.color = "#0f172a";
-      }, 2000);
+      setTimeout(() => { btn.innerText = "Kopyala"; }, 2000);
     }
   });
 };
@@ -292,13 +237,4 @@ document.addEventListener("DOMContentLoaded", () => {
   syncDiscordLinks();
   loadServerStats();
   loadDynamicTeamAndGallery();
-});
-
-// 6. ADMIN PANELİNE GİRİŞ KISAYOLU
-document.addEventListener("keydown", function(e) {
-  const isShortcut = (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') || e.key === 'F8';
-  if (isShortcut) {
-    e.preventDefault();
-    window.location.href = "admin/index.html";
-  }
 });
