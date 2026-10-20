@@ -16,6 +16,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+function getYoutubeThumbnail(url) {
+  if (!url) return null;
+  let videoId = null;
+  if (url.includes('youtube.com/watch?v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0];
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+  } else if (url.includes('youtube.com/embed/')) {
+    videoId = url.split('embed/')[1]?.split('?')[0];
+  }
+  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+}
+
 // 1. CANLI SAYAÇ (07/07/2025)
 const startDate = new Date("2025-07-07T00:00:00").getTime();
 
@@ -156,14 +169,16 @@ async function loadDynamicTeamAndGallery() {
       gallerySnap.forEach(docSnap => {
         const g = docSnap.data();
         if (g.showOnHome) {
+          let thumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
           galleryContainer.innerHTML += `
             <div class="gallery-card" onclick="window.location.href='gallery/index.html'">
               <div class="gallery-img-wrapper">
-                <img src="${g.thumbnail || g.url}" alt="${g.title}">
+                <img src="${thumb}" alt="${g.title}">
               </div>
               <div class="gallery-info">
                 <h3>${g.title}</h3>
                 <p>${g.desc || ''}</p>
+                ${g.date ? `<div style="font-size: 0.75rem; color: #2563eb; font-weight: 700; margin-top: 0.5rem;">📅 ${g.date}</div>` : ''}
               </div>
             </div>
           `;
