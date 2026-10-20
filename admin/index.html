@@ -194,7 +194,7 @@
           <button class="admin-btn" id="btnSaveDiscord">Discord Bağlantısını Güncelle</button>
         </div>
 
-        <!-- EKİP YÖNETİMİ -->
+        <!-- EKİP & SOSYAL MEDYA YÖNETİMİ -->
         <div id="sectionTeam" style="display: none;">
           <div class="card-title-bar">
             <h3>Ekip Üyesi & Sosyal Medya Ekle</h3>
@@ -224,6 +224,14 @@
               <label>Instagram Linki</label>
               <input type="text" id="pSocialIg" class="admin-field" placeholder="https://instagram.com/...">
             </div>
+            <div class="admin-input-group">
+              <label>Twitch Linki</label>
+              <input type="text" id="pSocialTw" class="admin-field" placeholder="https://twitch.tv/...">
+            </div>
+            <div class="admin-input-group">
+              <label>Kick Linki</label>
+              <input type="text" id="pSocialKick" class="admin-field" placeholder="https://kick.com/...">
+            </div>
           </div>
           <button class="admin-btn" id="btnSaveTeam">Ekip Üyesini Kaydet</button>
           <hr style="margin: 2rem 0; border: none; border-top: 1px solid #f1f5f9;">
@@ -231,24 +239,47 @@
           <div id="teamList" style="margin-top: 1rem;"></div>
         </div>
 
-        <!-- GALERİ YÖNETİMİ -->
+        <!-- GALERİ YÖNETİMİ (TARİH VE MEDYA TÜRÜ EKLENDİ) -->
         <div id="sectionGallery" style="display: none;">
           <div class="card-title-bar">
-            <h3>Galeriye Medya Ekle</h3>
+            <h3>Galeriye Medya Ekle (Resim veya Video)</h3>
           </div>
           <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
             <div class="admin-input-group">
               <label>Başlık</label>
               <input type="text" id="galleryTitle" class="admin-field" placeholder="Örn: Otomatik Demir Çiftliği">
             </div>
-            <div class="admin-input-group">
-              <label>Medya URL Adresi</label>
-              <input type="text" id="galleryImgUrl" class="admin-field" placeholder="https://...">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+              <div class="admin-input-group">
+                <label>Medya Türü</label>
+                <select id="galleryType" class="admin-field">
+                  <option value="image">Fotoğraf (Görsel URL)</option>
+                  <option value="video">Video (MP4 veya YouTube Link)</option>
+                </select>
+              </div>
+
+              <div class="admin-input-group">
+                <label>Medya URL Adresi</label>
+                <input type="text" id="galleryImgUrl" class="admin-field" placeholder="https://...">
+              </div>
+
+              <div class="admin-input-group">
+                <label>Tarih (Çekildiği / Yapıldığı Tarih)</label>
+                <input type="date" id="galleryDate" class="admin-field">
+              </div>
             </div>
+
+            <div class="admin-input-group" id="thumbGroup" style="display: none;">
+              <label>Özel Kapak Resmi URL (Boş bırakılırsa YouTube'dan otomatik çekilir)</label>
+              <input type="text" id="galleryThumbUrl" class="admin-field" placeholder="https://...">
+            </div>
+
             <div class="admin-input-group">
               <label>Açıklama</label>
               <input type="text" id="galleryDesc" class="admin-field" placeholder="Açıklama yazın...">
             </div>
+
             <div style="display: flex; align-items: center; gap: 0.6rem;">
               <input type="checkbox" id="galleryShowOnHome" style="width: 18px; height: 18px; cursor: pointer;">
               <label for="galleryShowOnHome" style="font-weight: 700; color: #0f172a; font-size: 0.9rem; cursor: pointer;">Ana Sayfada Göster</label>
@@ -280,6 +311,19 @@
     const db = getFirestore(app);
     const ADMIN_PASS = "1234";
 
+    function getYoutubeThumbnail(url) {
+      if (!url) return null;
+      let videoId = null;
+      if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1]?.split('&')[0];
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('embed/')[1]?.split('?')[0];
+      }
+      return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+    }
+
     document.getElementById("btnLogin").addEventListener("click", () => {
       const pass = document.getElementById("adminPassword").value;
       if (pass === ADMIN_PASS) {
@@ -298,15 +342,21 @@
     function showDashboard() {
       document.getElementById("loginSection").style.display = "none";
       document.getElementById("dashboardSection").style.display = "block";
+      document.getElementById("galleryDate").valueAsDate = new Date();
       loadDiscordUrl();
       renderTeamList();
       renderGalleryList();
     }
 
+    // Video seçildiğinde özel kapak alanını göster
+    document.getElementById("galleryType").addEventListener("change", (e) => {
+      document.getElementById("thumbGroup").style.display = e.target.value === 'video' ? 'block' : 'none';
+    });
+
     // Navigasyon Menüleri
-    document.getElementById("btnNavDiscord").addEventListener("click", (e) => switchTab('discord', e.target));
-    document.getElementById("btnNavTeam").addEventListener("click", (e) => switchTab('team', e.target));
-    document.getElementById("btnNavGallery").addEventListener("click", (e) => switchTab('gallery', e.target));
+    document.getElementById("btnNavDiscord").addEventListener("click", (e) => switchTab('discord', e.currentTarget));
+    document.getElementById("btnNavTeam").addEventListener("click", (e) => switchTab('team', e.currentTarget));
+    document.getElementById("btnNavGallery").addEventListener("click", (e) => switchTab('gallery', e.currentTarget));
 
     function switchTab(tab, btn) {
       document.getElementById("sectionDiscord").style.display = tab === 'discord' ? 'block' : 'none';
@@ -318,18 +368,26 @@
 
     // Discord İşlemleri
     async function loadDiscordUrl() {
-      const docRef = doc(db, "settings", "general");
-      const snap = await getDoc(docRef);
-      if (snap.exists() && snap.data().discordUrl) {
-        document.getElementById("discordServerUrl").value = snap.data().discordUrl;
+      try {
+        const docRef = doc(db, "settings", "general");
+        const snap = await getDoc(docRef);
+        if (snap.exists() && snap.data().discordUrl) {
+          document.getElementById("discordServerUrl").value = snap.data().discordUrl;
+        }
+      } catch (e) {
+        console.error("Discord çekme hatası:", e);
       }
     }
 
     document.getElementById("btnSaveDiscord").addEventListener("click", async () => {
       const url = document.getElementById("discordServerUrl").value.trim();
       if (!url) return alert("Geçerli bir link giriniz!");
-      await setDoc(doc(db, "settings", "general"), { discordUrl: url }, { merge: true });
-      alert("Discord adresi canlı veritabanında güncellendi!");
+      try {
+        await setDoc(doc(db, "settings", "general"), { discordUrl: url }, { merge: true });
+        alert("Discord adresi canlı veritabanında güncellendi!");
+      } catch (e) {
+        alert("Kaydetme hatası: " + e.message);
+      }
     });
 
     // Ekip İşlemleri
@@ -342,93 +400,151 @@
         discord: document.getElementById("pSocialDc").value.trim(),
         namemc: document.getElementById("pSocialNameMc").value.trim(),
         youtube: document.getElementById("pSocialYt").value.trim(),
-        instagram: document.getElementById("pSocialIg").value.trim()
+        instagram: document.getElementById("pSocialIg").value.trim(),
+        twitch: document.getElementById("pSocialTw").value.trim(),
+        kick: document.getElementById("pSocialKick").value.trim()
       };
 
-      await setDoc(doc(db, "team", name.toLowerCase()), { name, role, socials });
-      alert(`${name} ekibe eklendi ve canlı veritabanına kaydedildi!`);
-      renderTeamList();
+      try {
+        await setDoc(doc(db, "team", name.toLowerCase()), { name, role, socials });
+        alert(`${name} ekibe eklendi ve Firebase canlı veritabanına kaydedildi!`);
+        clearTeamInputs();
+        renderTeamList();
+      } catch (e) {
+        alert("Kaydetme hatası: " + e.message);
+      }
     });
+
+    function clearTeamInputs() {
+      document.getElementById("teamMemberName").value = "";
+      document.getElementById("teamMemberRole").value = "";
+      document.getElementById("pSocialDc").value = "";
+      document.getElementById("pSocialNameMc").value = "";
+      document.getElementById("pSocialYt").value = "";
+      document.getElementById("pSocialIg").value = "";
+      document.getElementById("pSocialTw").value = "";
+      document.getElementById("pSocialKick").value = "";
+    }
 
     async function renderTeamList() {
       const container = document.getElementById("teamList");
       container.innerHTML = "Yükleniyor...";
-      const snap = await getDocs(collection(db, "team"));
-      container.innerHTML = "";
+      try {
+        const snap = await getDocs(collection(db, "team"));
+        container.innerHTML = "";
 
-      if (snap.empty) {
-        container.innerHTML = "<p style='font-size:0.85rem; color:#94a3b8;'>Henüz ekip üyesi yok.</p>";
-        return;
-      }
+        if (snap.empty) {
+          container.innerHTML = "<p style='font-size:0.85rem; color:#94a3b8;'>Henüz ekip üyesi yok.</p>";
+          return;
+        }
 
-      snap.forEach(docSnap => {
-        const m = docSnap.data();
-        const item = document.createElement("div");
-        item.className = "admin-list-item";
-        item.innerHTML = `
-          <div class="item-info">
-            <img src="https://mc-heads.net/avatar/${m.name}/64" alt="${m.name}">
-            <div>
-              <div class="item-title">${m.name}</div>
-              <div class="item-sub">${m.role}</div>
+        snap.forEach(docSnap => {
+          const m = docSnap.data();
+          const item = document.createElement("div");
+          item.className = "admin-list-item";
+          item.innerHTML = `
+            <div class="item-info">
+              <img src="https://mc-heads.net/avatar/${m.name}/64" alt="${m.name}">
+              <div>
+                <div class="item-title">${m.name}</div>
+                <div class="item-sub">${m.role}</div>
+              </div>
             </div>
-          </div>
-          <button class="btn-action btn-delete">Sil</button>
-        `;
-        item.querySelector(".btn-delete").addEventListener("click", async () => {
-          await deleteDoc(doc(db, "team", docSnap.id));
-          renderTeamList();
+            <button class="btn-action btn-delete">Sil</button>
+          `;
+          item.querySelector(".btn-delete").addEventListener("click", async () => {
+            if (confirm(`${m.name} silinsin mi?`)) {
+              await deleteDoc(doc(db, "team", docSnap.id));
+              renderTeamList();
+            }
+          });
+          container.appendChild(item);
         });
-        container.appendChild(item);
-      });
+      } catch (e) {
+        container.innerHTML = "<p style='color:red;'>Veri çekilemedi: " + e.message + "</p>";
+      }
     }
 
-    // Galeri İşlemleri
+    // Galeri İşlemleri (Tarih ve Medya Türü Otomatik Ayarlaması)
     document.getElementById("btnSaveGallery").addEventListener("click", async () => {
       const title = document.getElementById("galleryTitle").value.trim();
+      const type = document.getElementById("galleryType").value;
       const url = document.getElementById("galleryImgUrl").value.trim();
+      let thumb = document.getElementById("galleryThumbUrl").value.trim();
       const desc = document.getElementById("galleryDesc").value.trim();
       const showOnHome = document.getElementById("galleryShowOnHome").checked;
+      const customDateVal = document.getElementById("galleryDate").value;
 
       if (!title || !url) return alert("Başlık ve URL zorunludur!");
 
+      let selectedDate = customDateVal ? new Date(customDateVal) : new Date();
+      let dateStr = selectedDate.toLocaleDateString('tr-TR');
+
+      if (!thumb && type === 'video') {
+        thumb = getYoutubeThumbnail(url);
+      }
+
       const id = "img_" + Date.now();
-      await setDoc(doc(db, "gallery", id), { title, url, desc, showOnHome });
-      alert("Medya canlı veritabanına kaydedildi!");
-      renderGalleryList();
+      try {
+        await setDoc(doc(db, "gallery", id), {
+          title, type, url,
+          thumbnail: thumb,
+          desc, showOnHome,
+          date: dateStr,
+          timestamp: selectedDate.getTime()
+        });
+        alert("Medya canlı veritabanına kaydedildi!");
+        document.getElementById("galleryTitle").value = "";
+        document.getElementById("galleryImgUrl").value = "";
+        document.getElementById("galleryThumbUrl").value = "";
+        document.getElementById("galleryDesc").value = "";
+        document.getElementById("galleryShowOnHome").checked = false;
+        document.getElementById("galleryDate").valueAsDate = new Date();
+        renderGalleryList();
+      } catch (e) {
+        alert("Kaydetme hatası: " + e.message);
+      }
     });
 
     async function renderGalleryList() {
       const container = document.getElementById("galleryList");
       container.innerHTML = "Yükleniyor...";
-      const snap = await getDocs(collection(db, "gallery"));
-      container.innerHTML = "";
+      try {
+        const snap = await getDocs(collection(db, "gallery"));
+        container.innerHTML = "";
 
-      if (snap.empty) {
-        container.innerHTML = "<p style='font-size:0.85rem; color:#94a3b8;'>Henüz medya yok.</p>";
-        return;
-      }
+        if (snap.empty) {
+          container.innerHTML = "<p style='font-size:0.85rem; color:#94a3b8;'>Henüz medya yok.</p>";
+          return;
+        }
 
-      snap.forEach(docSnap => {
-        const g = docSnap.data();
-        const item = document.createElement("div");
-        item.className = "admin-list-item";
-        item.innerHTML = `
-          <div class="item-info">
-            <img src="${g.url}" alt="${g.title}">
-            <div>
-              <div class="item-title">${g.title} ${g.showOnHome ? '[Ana Sayfa]' : ''}</div>
-              <div class="item-sub">${g.desc || ''}</div>
+        snap.forEach(docSnap => {
+          const g = docSnap.data();
+          let displayThumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
+          
+          const item = document.createElement("div");
+          item.className = "admin-list-item";
+          item.innerHTML = `
+            <div class="item-info">
+              <img src="${displayThumb}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
+              <div>
+                <div class="item-title">${g.title} (${g.type ? g.type.toUpperCase() : 'IMAGE'}) ${g.showOnHome ? '[Ana Sayfa]' : ''}</div>
+                <div class="item-sub">${g.desc || 'Açıklama yok'} - <b>${g.date || ''}</b></div>
+              </div>
             </div>
-          </div>
-          <button class="btn-action btn-delete">Sil</button>
-        `;
-        item.querySelector(".btn-delete").addEventListener("click", async () => {
-          await deleteDoc(doc(db, "gallery", docSnap.id));
-          renderGalleryList();
+            <button class="btn-action btn-delete">Sil</button>
+          `;
+          item.querySelector(".btn-delete").addEventListener("click", async () => {
+            if (confirm("Bu medya silinsin mi?")) {
+              await deleteDoc(doc(db, "gallery", docSnap.id));
+              renderGalleryList();
+            }
+          });
+          container.appendChild(item);
         });
-        container.appendChild(item);
-      });
+      } catch (e) {
+        container.innerHTML = "<p style='color:red;'>Veri çekilemedi: " + e.message + "</p>";
+      }
     }
 
     if (sessionStorage.getItem("admin_auth") === "true") {
