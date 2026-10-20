@@ -52,7 +52,7 @@ function updateTimer() {
 setInterval(updateTimer, 1000);
 updateTimer();
 
-// 2. DISCORD LİNKİ YÜKLEME (Firebase'den)
+// 2. DISCORD LİNKİ YÜKLEME
 async function syncDiscordLinks() {
   try {
     const docRef = doc(db, "settings", "general");
@@ -129,9 +129,7 @@ async function loadDynamicTeamAndGallery() {
             (pSocials.discord && pSocials.discord.trim()) ||
             (pSocials.namemc && pSocials.namemc.trim()) ||
             (pSocials.youtube && pSocials.youtube.trim()) ||
-            (pSocials.instagram && pSocials.instagram.trim()) ||
-            (pSocials.twitch && pSocials.twitch.trim()) ||
-            (pSocials.kick && pSocials.kick.trim())
+            (pSocials.instagram && pSocials.instagram.trim())
           );
 
           if (hasAnySocial) {
@@ -160,7 +158,7 @@ async function loadDynamicTeamAndGallery() {
     }
   }
 
-  // Galeri Yükleme
+  // Galeri Yükleme (Ana Sayfa)
   if (galleryContainer) {
     try {
       const gallerySnap = await getDocs(collection(db, "gallery"));
@@ -169,11 +167,11 @@ async function loadDynamicTeamAndGallery() {
       gallerySnap.forEach(docSnap => {
         const g = docSnap.data();
         if (g.showOnHome) {
-          let thumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
+          let displayThumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
           galleryContainer.innerHTML += `
             <div class="gallery-card" onclick="window.location.href='gallery/index.html'">
               <div class="gallery-img-wrapper">
-                <img src="${thumb}" alt="${g.title}">
+                <img src="${displayThumb}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
               </div>
               <div class="gallery-info">
                 <h3>${g.title}</h3>
@@ -248,22 +246,6 @@ window.openPlayerCardModal = function(playerName, role, playerSocials = {}) {
     `;
   }
 
-  if (playerSocials.twitch && playerSocials.twitch.trim()) {
-    socialRowsHtml += `
-      <a href="${playerSocials.twitch.trim()}" target="_blank" class="social-row-item">
-        <div class="social-icon-label"><span class="icon">💜</span><div class="social-text-info"><span class="social-title">Twitch</span><span class="social-val">Yayını Gör</span></div></div><span class="arrow">→</span>
-      </a>
-    `;
-  }
-
-  if (playerSocials.kick && playerSocials.kick.trim()) {
-    socialRowsHtml += `
-      <a href="${playerSocials.kick.trim()}" target="_blank" class="social-row-item">
-        <div class="social-icon-label"><span class="icon">🟢</span><div class="social-text-info"><span class="social-title">Kick</span><span class="social-val">Yayını Gör</span></div></div><span class="arrow">→</span>
-      </a>
-    `;
-  }
-
   modal.innerHTML = `
     <div class="player-card-modal" onclick="event.stopPropagation()">
       <button class="player-card-close" onclick="closePlayerCardModal()">✕</button>
@@ -312,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadDynamicTeamAndGallery();
 });
 
-// 6. ADMIN PANELİNE GİRİŞ KISAYOLU (F8 veya Ctrl + Shift + P)
+// 6. ADMIN PANELİNE GİRİŞ KISAYOLU
 document.addEventListener("keydown", function(e) {
   const isShortcut = (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') || e.key === 'F8';
   if (isShortcut) {
