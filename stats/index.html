@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perseus TMC - Kazı İstatistikleri</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .stats-container {
+      max-width: 900px;
+      margin: 3rem auto 6rem;
+      padding: 0 1.5rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1.1rem 1.5rem;
+      padding-left: 3.2rem;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: #2563eb;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 1rem 1.5rem;
+      border-radius: 18px;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .player-row:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05);
+      border-color: #cbd5e1;
+    }
+
+    .rank-number {
+      font-weight: 800;
+      width: 40px;
+      font-size: 1.1rem;
+      color: #64748b;
+    }
+
+    .rank-1 .rank-number { color: #d97706; }
+    .rank-2 .rank-number { color: #475569; }
+    .rank-3 .rank-number { color: #c2410c; }
+
+    .player-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      margin-right: 1.2rem;
+    }
+
+    .player-info-meta {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .player-info-meta h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .player-info-meta p {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .digs-amount {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #2563eb;
+      text-align: right;
+    }
+
+    .digs-unit {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-glow"></div>
+
+  <nav class="navbar">
+    <div class="logo">Perseus TMC <span>Stats</span></div>
+    <ul class="nav-links">
+      <li><a href="../">← Ana Sayfaya Dön</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="https://discord.gg" target="_blank" class="nav-btn-discord">Discord</a>
+    </div>
+  </nav>
+
+  <div class="stats-container">
+    <div class="section-header">
+      <span class="section-badge">DIGS SKOR TABLOSU</span>
+      <h2>En Çok Kazı Yapan Oyuncular</h2>
+      <p class="section-sub">Tüm oyuncular aşağıda listelenmiştir. Detaylı Minecraft A-Z istatistikleri için oyuncunun üzerine tıklayın.</p>
+    </div>
+
+    <div class="search-wrapper">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="statsSearch" placeholder="Oyuncu adı yazarak arayın..." class="search-input" onkeyup="filterPlayers()">
+    </div>
+
+    <div id="allPlayersList">
+      <p style="text-align: center; color: #94a3b8; padding: 2rem;">İstatistikler yükleniyor...</p>
+    </div>
+  </div>
+
+  <script>
+    let allStatsData = [];
+
+    async function fetchStatsPage() {
+      try {
+        const res = await fetch('../stats.json');
+        if (!res.ok) return;
+        allStatsData = await res.json();
+        renderPlayerList(allStatsData);
+      } catch (e) {
+        console.error("Stats verisi çekilemedi:", e);
+      }
+    }
+
+    function renderPlayerList(data) {
+      const container = document.getElementById("allPlayersList");
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 2rem;">Oyuncu bulunamadı.</p>';
+        return;
+      }
+
+      data.forEach((player, idx) => {
+        const rank = idx + 1;
+        const name = player.name || player.uuid;
+        const digs = player.digs ? player.digs.toLocaleString() : 0;
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+
+        const row = document.createElement("a");
+        row.href = `player/index.html?name=${encodeURIComponent(name)}`;
+        row.className = `player-row ${rankClass}`;
+
+        row.innerHTML = `
+          <div class="rank-number">#${rank}</div>
+          <img src="https://mc-heads.net/avatar/${name}/64" class="player-avatar" alt="${name}">
+          <div class="player-info-meta">
+            <h3>${name}</h3>
+            <p>Tüm A-Z İstatistiklerini Gör →</p>
+          </div>
+          <div>
+            <div class="digs-amount">${digs}</div>
+            <div class="digs-unit">Blok Kazıldı</div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function filterPlayers() {
+      const q = document.getElementById("statsSearch").value.toLowerCase();
+      const filtered = allStatsData.filter(p => (p.name || p.uuid).toLowerCase().includes(q));
+      renderPlayerList(filtered);
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchStatsPage);
+  </script>
+</body>
+</html>

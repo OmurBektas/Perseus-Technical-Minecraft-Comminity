@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oyuncu Detay İstatistikleri - Perseus TMC</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .player-detail-container { max-width: 1000px; margin: 3rem auto 6rem; padding: 0 1.5rem; }
+    
+    .player-header-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .player-main-meta { display: flex; align-items: center; gap: 1.8rem; }
+    .player-body-render { height: 140px; width: auto; object-fit: contain; }
+    .player-header-info h1 { font-size: 2.2rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem; }
+    .player-sub-tag { color: #64748b; font-weight: 600; font-size: 0.9rem; margin-bottom: 1rem; }
+
+    .key-stats-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .key-stat-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.5rem 0.9rem; border-radius: 12px; }
+    .key-stat-box label { display: block; font-size: 0.68rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+    .key-stat-box span { font-size: 0.95rem; font-weight: 800; color: #2563eb; }
+
+    .player-socials { display: flex; flex-direction: column; gap: 0.5rem; min-width: 130px; }
+    .social-link-btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.45rem 0.8rem; border-radius: 10px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: #ffffff; }
+    .social-link-btn.discord { background: #5865F2; }
+    .social-link-btn.youtube { background: #FF0000; }
+    .social-link-btn.instagram { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
+    .social-link-btn.twitch { background: #9146FF; }
+    .social-link-btn.kick { background: #53FC18; color: #000000; }
+
+    /* Ana Sekmeler */
+    .mc-main-tabs { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .mc-tab-btn {
+      flex: 1;
+      max-width: 220px;
+      padding: 0.8rem 1.5rem;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .mc-tab-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+      box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.3);
+    }
+
+    .table-controls { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+    .table-search { width: 100%; padding: 0.9rem 1.2rem; border-radius: 14px; border: 1px solid #e2e8f0; outline: none; font-weight: 600; }
+
+    .stats-table-wrapper {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      overflow-x: auto;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+    }
+
+    .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .custom-table th {
+      background: #f8fafc;
+      padding: 1rem 1.2rem;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .custom-table th:hover { background: #f1f5f9; color: #2563eb; }
+    .custom-table td { padding: 0.85rem 1.2rem; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #1e293b; white-space: nowrap; }
+    .custom-table tr:hover td { background: #f8fafc; }
+    .val-active { color: #2563eb; font-weight: 800; }
+    .val-empty { color: #cbd5e1; }
+  </style>
+</head>
+<body>
+
+  <div class="hero-glow"></div>
+
+  <nav class="navbar">
+    <div class="logo">Perseus TMC <span>Oyuncu Profili</span></div>
+    <ul class="nav-links">
+      <li><a href="../">← İstatistik Sıralamasına Dön</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="https://discord.gg" target="_blank" class="nav-btn-discord">Discord</a>
+    </div>
+  </nav>
+
+  <div class="player-detail-container">
+    <!-- Header Card -->
+    <div class="player-header-card">
+      <div class="player-main-meta">
+        <img id="pBodyRender" src="" alt="Full Body Render" class="player-body-render">
+        <div class="player-header-info">
+          <h1 id="pName">Oyuncu Adı</h1>
+          <div class="player-sub-tag">Perseus Teknik Minecraft Üyesi</div>
+          <div class="key-stats-row">
+            <div class="key-stat-box"><label>Kazı Skoru</label><span id="pDigsVal">0</span></div>
+            <div class="key-stat-box"><label>Oynama Saati</label><span id="pPlaytimeVal">0 Sa</span></div>
+            <div class="key-stat-box"><label>İlk Giriş Tarihi</label><span id="pFirstJoinVal">-</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sosyal Medya Link Alanı -->
+      <div class="player-socials" id="socialsContainer"></div>
+    </div>
+
+    <!-- TÜRKÇE SEKMELER -->
+    <div class="mc-main-tabs">
+      <button class="mc-tab-btn active" onclick="switchMcTab('general')">Genel</button>
+      <button class="mc-tab-btn" onclick="switchMcTab('items')">Eşyalar</button>
+      <button class="mc-tab-btn" onclick="switchMcTab('mobs')">Yaratıklar</button>
+    </div>
+
+    <div class="table-controls">
+      <input type="text" id="tableSearch" placeholder="Aramak için yazın..." class="table-search" onkeyup="renderCurrentTab()">
+    </div>
+
+    <!-- Tablo -->
+    <div class="stats-table-wrapper">
+      <table class="custom-table" id="mcStatsTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let activePlayerData = null;
+    let activeTab = 'general';
+    
+    let sortColumn = 'value'; 
+    let sortAsc = false; 
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetPlayerName = urlParams.get('name');
+
+    async function loadPlayerData() {
+      if (!targetPlayerName) { window.location.href = "../"; return; }
+
+      try {
+        const res = await fetch('../../stats.json');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        activePlayerData = data.find(p => (p.name || p.uuid).toLowerCase() === targetPlayerName.toLowerCase());
+
+        if (!activePlayerData) {
+          document.getElementById("pName").innerText = targetPlayerName;
+          document.getElementById("tableBody").innerHTML = '<tr><td style="text-align:center; padding:2rem;">İstatistik bulunamadı.</td></tr>';
+          return;
+        }
+
+        const playerName = activePlayerData.name || activePlayerData.uuid;
+        document.getElementById("pName").innerText = playerName;
+        document.getElementById("pBodyRender").src = `https://mc-heads.net/body/${playerName}/140`;
+        document.getElementById("pDigsVal").innerText = (activePlayerData.digs || 0).toLocaleString();
+        document.getElementById("pPlaytimeVal").innerText = `${activePlayerData.play_hours || 0} Sa`;
+        document.getElementById("pFirstJoinVal").innerText = activePlayerData.first_join || "-";
+
+        // LocalStorage üzerindeki yönetici verisini oku ve birleştir
+        const savedLocalSocials = JSON.parse(localStorage.getItem("player_socials_db") || "{}");
+        const localPlayerSocials = savedLocalSocials[playerName.toLowerCase()] || {};
+        const finalSocials = { ...(activePlayerData.socials || {}), ...localPlayerSocials };
+
+        renderSocials(finalSocials);
+        renderCurrentTab();
+      } catch (e) {
+        console.error("Veri yükleme hatası:", e);
+      }
+    }
+
+    function renderSocials(socials) {
+      const container = document.getElementById("socialsContainer");
+      container.innerHTML = "";
+
+      const platforms = [
+        { key: 'discord', name: 'Discord', class: 'discord' },
+        { key: 'youtube', name: 'YouTube', class: 'youtube' },
+        { key: 'instagram', name: 'Instagram', class: 'instagram' },
+        { key: 'twitch', name: 'Twitch', class: 'twitch' },
+        { key: 'kick', name: 'Kick', class: 'kick' }
+      ];
+
+      platforms.forEach(p => {
+        if (socials[p.key] && socials[p.key].trim() !== "") {
+          const a = document.createElement("a");
+          a.href = socials[p.key];
+          a.target = "_blank";
+          a.className = `social-link-btn ${p.class}`;
+          a.innerText = p.name;
+          container.appendChild(a);
+        }
+      });
+    }
+
+    function switchMcTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.mc-tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (tab === 'general') { sortColumn = 'value'; sortAsc = false; }
+      else if (tab === 'items') { sortColumn = 'mined'; sortAsc = false; }
+      else if (tab === 'mobs') { sortColumn = 'killed'; sortAsc = false; }
+
+      renderCurrentTab();
+    }
+
+    function handleSort(col) {
+      if (sortColumn === col) {
+        sortAsc = !sortAsc;
+      } else {
+        sortColumn = col;
+        sortAsc = false;
+      }
+      renderCurrentTab();
+    }
+
+    function getSortIcon(col) {
+      if (sortColumn !== col) return '';
+      return sortAsc ? ' ▲' : ' ▼';
+    }
+
+    function renderCurrentTab() {
+      if (!activePlayerData) return;
+
+      const q = document.getElementById("tableSearch").value.toLowerCase();
+      const thead = document.getElementById("tableHead");
+      const tbody = document.getElementById("tableBody");
+
+      thead.innerHTML = "";
+      tbody.innerHTML = "";
+
+      // 1. GENEL TABLOSU
+      if (activeTab === 'general') {
+        thead.innerHTML = `
+          <tr>
+            <th onclick="handleSort('name')">İstatistik Adı${getSortIcon('name')}</th>
+            <th style="text-align:right;" onclick="handleSort('value')">Miktar / Değer${getSortIcon('value')}</th>
+          </tr>`;
+        
+        let list = (activePlayerData.general_stats || []).filter(i => i.name.toLowerCase().includes(q));
+
+        list.sort((a, b) => {
+          let valA = a[sortColumn];
+          let valB = b[sortColumn];
+          if (typeof valA === 'string') return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          return sortAsc ? valA - valB : valB - valA;
+        });
+
+        if (!list.length) { tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:2rem;">Kayıt yok.</td></tr>'; return; }
+
+        list.forEach(i => {
+          tbody.innerHTML += `<tr><td>${i.name}</td><td style="text-align:right;" class="val-active">${i.value.toLocaleString()}</td></tr>`;
+        });
+      }
+
+      // 2. EŞYALAR TABLOSU
+      else if (activeTab === 'items') {
+        thead.innerHTML = `
+          <tr>
+            <th onclick="handleSort('name')">Eşya Adı${getSortIcon('name')}</th>
+            <th style="text-align:center;" onclick="handleSort('mined')">Kazıldı${getSortIcon('mined')}</th>
+            <th style="text-align:center;" onclick="handleSort('crafted')">Üretildi${getSortIcon('crafted')}</th>
+            <th style="text-align:center;" onclick="handleSort('used')">Kullanıldı${getSortIcon('used')}</th>
+            <th style="text-align:center;" onclick="handleSort('picked_up')">Toplandı${getSortIcon('picked_up')}</th>
+            <th style="text-align:center;" onclick="handleSort('dropped')">Düşürüldü${getSortIcon('dropped')}</th>
+          </tr>`;
+        
+        let list = (activePlayerData.items_stats || []).filter(i => i.name.toLowerCase().includes(q));
+
+        list.sort((a, b) => {
+          let valA = a[sortColumn] || 0;
+          let valB = b[sortColumn] || 0;
+          if (sortColumn === 'name') return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+          return sortAsc ? valA - valB : valB - valA;
+        });
+
+        if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">Kayıt yok.</td></tr>'; return; }
+
+        let rowsHtml = '';
+        list.forEach(i => {
+          rowsHtml += `
+            <tr>
+              <td><b>${i.name}</b></td>
+              <td style="text-align:center;" class="${i.mined ? 'val-active' : 'val-empty'}">${i.mined ? i.mined.toLocaleString() : '-'}</td>
+              <td style="text-align:center;" class="${i.crafted ? 'val-active' : 'val-empty'}">${i.crafted ? i.crafted.toLocaleString() : '-'}</td>
+              <td style="text-align:center;" class="${i.used ? 'val-active' : 'val-empty'}">${i.used ? i.used.toLocaleString() : '-'}</td>
+              <td style="text-align:center;" class="${i.picked_up ? 'val-active' : 'val-empty'}">${i.picked_up ? i.picked_up.toLocaleString() : '-'}</td>
+              <td style="text-align:center;" class="${i.dropped ? 'val-active' : 'val-empty'}">${i.dropped ? i.dropped.toLocaleString() : '-'}</td>
+            </tr>`;
+        });
+        tbody.innerHTML = rowsHtml;
+      }
+
+      // 3. YARATIKLAR TABLOSU
+      else if (activeTab === 'mobs') {
+        thead.innerHTML = `
+          <tr>
+            <th onclick="handleSort('name')">Yaratık Adı${getSortIcon('name')}</th>
+            <th style="text-align:center;" onclick="handleSort('killed')">Öldürülen${getSortIcon('killed')}</th>
+            <th style="text-align:center;" onclick="handleSort('killed_by')">Seni Öldüren${getSortIcon('killed_by')}</th>
+          </tr>`;
+        
+        let list = (activePlayerData.mobs_stats || []).filter(i => i.name.toLowerCase().includes(q));
+
+        list.sort((a, b) => {
+          let valA = a[sortColumn] || 0;
+          let valB = b[sortColumn] || 0;
+          if (sortColumn === 'name') return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+          return sortAsc ? valA - valB : valB - valA;
+        });
+
+        if (!list.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">Kayıt yok.</td></tr>'; return; }
+
+        let rowsHtml = '';
+        list.forEach(i => {
+          rowsHtml += `
+            <tr>
+              <td><b>${i.name}</b></td>
+              <td style="text-align:center;" class="${i.killed ? 'val-active' : 'val-empty'}">${i.killed ? i.killed.toLocaleString() : '0'}</td>
+              <td style="text-align:center;" class="${i.killed_by ? 'val-active' : 'val-empty'}">${i.killed_by ? i.killed_by.toLocaleString() : '0'}</td>
+            </tr>`;
+        });
+        tbody.innerHTML = rowsHtml;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadPlayerData);
+  </script>
+</body>
+</html>

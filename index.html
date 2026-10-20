@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perseus TMC</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Arka Plan Mavi Glow Efekti -->
+  <div class="hero-glow"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">Perseus TMC</div>
+    <ul class="nav-links">
+      <li><a href="gallery/index.html">Galeri</a></li>
+      <li><a href="#features">Özellikler</a></li>
+      <li><a href="#team">Ekip</a></li>
+      <li><a href="#leaderboard">Sıralama</a></li>
+      <li><a href="#apply">Başvuru</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="https://discord.gg" target="_blank" class="nav-btn-discord">Discord</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero" class="hero-section">
+    <div class="version-tag">VANİLLA • 1.12.2 FABRİC • 1.21.11</div>
+    
+    <h1 class="hero-title">
+      Perseus Teknik<br>
+      <span class="gradient-text">Minecraft Topluluğu</span>
+    </h1>
+
+    <p class="hero-subtext">
+      Teknik mükemmellik ve topluluk ruhunun buluştuğu nokta.<br>
+      Sınırları zorlayan projeler için bir aradayız.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="https://discord.gg" target="_blank" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        Discord'a Katıl
+      </a>
+      <a href="#features" class="btn-secondary">Detayları İncele →</a>
+    </div>
+
+    <!-- Canlı Sayaç -->
+    <div class="timer-container">
+      <div class="timer-title">7 TEMMUZ 2025'TEN BU YANA KESİNTİSİZ</div>
+      <div class="timer-grid">
+        <div class="timer-box"><span id="days">00</span><label>GÜN</label></div>
+        <div class="timer-box"><span id="hours">00</span><label>SAAT</label></div>
+        <div class="timer-box"><span id="minutes">00</span><label>DAKİKA</label></div>
+        <div class="timer-box"><span id="seconds">00</span><label>SANİYE</label></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Galeri Section -->
+  <section id="gallery" class="section">
+    <div class="section-header">
+      <span class="section-badge">GÖRSELLER & PROJELER</span>
+      <h2>Sunucumuzdan Kareler</h2>
+      <p class="section-sub">Perseus Sunucusunda inşa edilen projeler.</p>
+    </div>
+
+    <div class="gallery-grid" id="galleryContainer">
+      <!-- JavaScript dinamik yükler -->
+    </div>
+    
+    <div style="text-align: center; margin-top: 2.5rem;">
+      <a href="gallery/index.html" class="btn-secondary">Tüm Galeri & Medyaları Gör →</a>
+    </div>
+  </section>
+
+  <!-- Özellikler Section -->
+  <section id="features" class="section">
+    <div class="section-header">
+      <span class="section-badge">MİMARİ & PERFORMANS</span>
+      <h2>Teknik Üstünlüklerimiz</h2>
+      <p class="section-sub">Sunucu performansını korurken karmaşık redstone düzeneklerine izin veren altyapımız.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>20 TPS Kararlılığı</h3>
+        <p>Kendi Homeserver'ımız ile en güçlü deneyim.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <h3>Gelişmiş Redstone</h3>
+        <p>İleri seviye redstone sistemler ve karmaşık farmlar için uyumlu teknik ayarlar.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Main Storage</h3>
+        <p>Milyonlarca eşyayı kayıpsız depolamamızı sağlayan ve düzen içinde tutan sistemler.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ekip Section -->
+  <section id="team" class="section">
+    <div class="section-header">
+      <span class="section-badge">YÖNETİM & KADRO</span>
+      <h2>Ekibimiz</h2>
+      <p class="section-sub">Perseus topluluğunu yöneten ve geliştiren ekip üyeleri.</p>
+    </div>
+
+    <div class="team-grid" id="teamContainer">
+      <!-- JavaScript dinamik yükler -->
+    </div>
+  </section>
+
+  <!-- Liderlik Tablosu Section -->
+  <section id="leaderboard" class="section">
+    <div class="section-header">
+      <span class="section-badge">SKOR TABLOSU</span>
+      <h2>En Çok Kazı Yapan Oyuncular</h2>
+      <p class="section-sub">Scoreboard <code>Digs</code> verilerine göre güncellenen en aktif madencilerimiz.</p>
+    </div>
+
+    <div class="leaderboard-container">
+      <div class="leaderboard-list" id="topDigsList">
+        <p style="text-align: center; color: #94a3b8;">Veriler yükleniyor...</p>
+      </div>
+
+      <div class="leaderboard-footer">
+        <a href="stats/index.html" class="stats-redirect-btn">
+          <span>Tüm Oyuncu İstatistiklerini Gör</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Başvuru & Whitelist Section (Skor Tablosunun Altında) -->
+  <section id="apply" class="section">
+    <div class="section-header">
+      <span class="section-badge">TOPLULUĞA KATILIN</span>
+      <h2>Nasıl PTECH'e Başvuru Yapılır?</h2>
+      <p class="section-sub">Perseus Teknik topluluğunun bir parçası olmak ve Whitelist'e dahil edilmek için izlemeniz gereken adımlar.</p>
+    </div>
+
+    <div class="apply-container">
+      <div class="apply-steps-grid">
+        <div class="apply-step-card">
+          <div class="step-num">01</div>
+          <h3>Öğrenmeye Açık Olun</h3>
+          <p>Sunucumuzda yaş sınırı veya mikrofon zorunluluğu bulunmamaktadır. Redstone ve farmlara ilginiz varsa veya teknik Minecraft anlamında hiçbir şey bilmiyorsanız bile sorun değil; bizimle vakit geçirerek her şeyi öğrenebilirsiniz!</p>
+        </div>
+
+        <div class="apply-step-card">
+          <div class="step-num">02</div>
+          <h3>Discord Üzerinden Başvurun</h3>
+          <p>Tüm Whitelist ve oyuncu alım süreçleri resmi Discord sunucumuz üzerinden yürütülür. Discord'a katıldıktan sonra başvuru kanalından kolayca Whitelist talebinde bulunabilirsiniz.</p>
+        </div>
+
+        <div class="apply-step-card">
+          <div class="step-num">03</div>
+          <h3>Aktif Kalın & Eğlenin</h3>
+          <p>Sunucu düzenini korumak adına; uzun süre giriş yapmayan ve pasif kalan oyuncular Whitelist listesinden çıkarılır. Tek beklentimiz düzenli katılım ve topluluk ruhudur.</p>
+        </div>
+      </div>
+
+      <div class="apply-cta-box">
+        <div class="cta-info">
+          <h3>Aramıza Katılmaya Hazır Mısınız?</h3>
+          <p>Discord sunucumuza gelerek Whitelist başvurunuzu anında başlatabilirsiniz.</p>
+        </div>
+        <a href="https://discord.gg" target="_blank" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+          Discord Başvurusu Yap
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER (TÜM HAKLARI SAKLIDIR ALANI) -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="logo">Perseus TMC</div>
+        <p>Teknik Minecraft topluluğunun buluşma noktası.</p>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025-2026 <strong>Perseus TMC</strong>. Tüm Hakları Saklıdır.</p>
+        <p class="footer-disclaimer">Mojang AB veya Microsoft ile doğrudan bir bağlantımız yoktur.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

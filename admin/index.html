@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perseus TMC - Yönetici Paneli</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .admin-container { max-width: 1100px; margin: 3rem auto 6rem; padding: 0 1.5rem; }
+    
+    .login-wrapper {
+      max-width: 420px;
+      margin: 6rem auto;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 2.5rem;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .login-wrapper h2 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; }
+    .login-wrapper p { font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem; }
+
+    .admin-input-group { margin-bottom: 1rem; text-align: left; }
+    .admin-input-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.4rem; }
+    
+    .admin-field {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      outline: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    .admin-field:focus { border-color: #2563eb; }
+
+    .admin-btn {
+      width: 100%;
+      padding: 0.9rem;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .admin-btn:hover { opacity: 0.9; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .admin-sidebar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      height: fit-content;
+    }
+
+    .sidebar-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.85rem 1.2rem;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #64748b;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .sidebar-btn.active, .sidebar-btn:hover {
+      background: #f1f5f9;
+      color: #2563eb;
+    }
+
+    .admin-content-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+    }
+
+    .card-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-title-bar h3 { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+
+    .admin-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      margin-bottom: 0.8rem;
+      background: #f8fafc;
+    }
+
+    .item-info { display: flex; align-items: center; gap: 1rem; }
+    .item-info img { width: 45px; height: 45px; border-radius: 10px; object-fit: cover; }
+    .item-title { font-weight: 700; color: #0f172a; font-size: 0.95rem; }
+    .item-sub { font-size: 0.8rem; color: #64748b; }
+
+    .btn-action {
+      border: none;
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn-edit { background: #eff6ff; color: #2563eb; }
+    .btn-edit:hover { background: #dbeafe; }
+
+    .btn-delete { background: #fee2e2; color: #ef4444; }
+    .btn-delete:hover { background: #fca5a5; color: #991b1b; }
+
+    .edit-modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .edit-modal-box {
+      background: #ffffff; border-radius: 20px; width: 100%; max-width: 550px;
+      padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-glow"></div>
+
+  <nav class="navbar">
+    <div class="logo">Perseus TMC <span>Admin</span></div>
+    <ul class="nav-links">
+      <li><a href="../">← Ana Sayfaya Dön</a></li>
+    </ul>
+  </nav>
+
+  <!-- GİRİŞ EKRANI -->
+  <div id="loginSection" class="login-wrapper">
+    <h2>Yönetici Girişi</h2>
+    <p>Perseus TMC yönetim paneline erişmek için şifrenizi girin.</p>
+    
+    <div class="admin-input-group">
+      <label>Yönetici Şifresi</label>
+      <input type="password" id="adminPassword" class="admin-field" placeholder="••••••••">
+    </div>
+
+    <button class="admin-btn" onclick="checkAdminLogin()">Giriş Yap</button>
+  </div>
+
+  <!-- DASHBOARD EKRANI -->
+  <div id="dashboardSection" class="admin-container" style="display: none;">
+    
+    <div class="section-header" style="text-align: left; margin-bottom: 1.5rem;">
+      <h2>Yönetim Paneli</h2>
+      <p class="section-sub">Sitedeki görselleri, ekibi, Discord davet bağlantısını ve oyuncu sosyal medya hesaplarını buradan yönetebilirsiniz.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- Sol Menü -->
+      <div class="admin-sidebar">
+        <button class="sidebar-btn active" onclick="switchSection('discord')">💬 Discord Sunucu Linki</button>
+        <button class="sidebar-btn" onclick="switchSection('socials')">🔗 Oyuncu Sosyal Medya</button>
+        <button class="sidebar-btn" onclick="switchSection('team')">👥 Ekip Kadrosu</button>
+        <button class="sidebar-btn" onclick="switchSection('gallery')">🖼️ Galeri / Medya</button>
+        <button class="sidebar-btn" style="color: #ef4444; margin-top: 1rem;" onclick="logoutAdmin()">🚪 Çıkış Yap</button>
+      </div>
+
+      <!-- Sağ İçerik Alanı -->
+      <div class="admin-content-card">
+        
+        <!-- 0. DISCORD LİNKİ YÖNETİMİ -->
+        <div id="sectionDiscord">
+          <div class="card-title-bar">
+            <h3>Discord Sunucu Bağlantısı</h3>
+          </div>
+
+          <div class="admin-input-group" style="margin-bottom: 1.5rem;">
+            <label>Discord Davet URL Adresi</label>
+            <input type="text" id="discordServerUrl" class="admin-field" placeholder="https://discord.gg/ornek-davet-linki">
+          </div>
+
+          <button class="admin-btn" onclick="saveDiscordUrl()">Discord Bağlantısını Güncelle</button>
+        </div>
+
+        <!-- 1. OYUNCU SOSYAL MEDYA YÖNETİMİ -->
+        <div id="sectionSocials" style="display: none;">
+          <div class="card-title-bar">
+            <h3>Oyuncu Sosyal Medya Ekle / Düzenle</h3>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="admin-input-group" style="grid-column: span 2;">
+              <label>Oyuncu Adı (Minecraft ID)</label>
+              <input type="text" id="pSocialName" class="admin-field" placeholder="Örn: omur77">
+            </div>
+            <div class="admin-input-group">
+              <label>Discord Kullanıcı Adı (Örn: omur77)</label>
+              <input type="text" id="pSocialDc" class="admin-field" placeholder="omur77">
+            </div>
+            <div class="admin-input-group">
+              <label>NameMC Profil Linki (İsteğe Bağlı)</label>
+              <input type="text" id="pSocialNameMc" class="admin-field" placeholder="https://namemc.com/profile/...">
+            </div>
+            <div class="admin-input-group">
+              <label>YouTube Linki</label>
+              <input type="text" id="pSocialYt" class="admin-field" placeholder="https://youtube.com/...">
+            </div>
+            <div class="admin-input-group">
+              <label>Instagram Linki</label>
+              <input type="text" id="pSocialIg" class="admin-field" placeholder="https://instagram.com/...">
+            </div>
+            <div class="admin-input-group">
+              <label>Twitch Linki</label>
+              <input type="text" id="pSocialTw" class="admin-field" placeholder="https://twitch.tv/...">
+            </div>
+            <div class="admin-input-group">
+              <label>Kick Linki</label>
+              <input type="text" id="pSocialKick" class="admin-field" placeholder="https://kick.com/...">
+            </div>
+          </div>
+
+          <button class="admin-btn" onclick="savePlayerSocials()">Sosyal Bağlantıları Kaydet</button>
+
+          <hr style="margin: 2rem 0; border: none; border-top: 1px solid #f1f5f9;">
+
+          <h4>Kayıtlı Oyuncu Sosyal Medyaları</h4>
+          <div id="socialsList" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- 2. EKİP KADROSU YÖNETİMİ -->
+        <div id="sectionTeam" style="display: none;">
+          <div class="card-title-bar">
+            <h3>Yeni Ekip Üyesi Ekle</h3>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="admin-input-group">
+              <label>Minecraft Oyuncu Adı</label>
+              <input type="text" id="teamMemberName" class="admin-field" placeholder="Örn: OmurBektas">
+            </div>
+            <div class="admin-input-group">
+              <label>Rolü / Görevi</label>
+              <input type="text" id="teamMemberRole" class="admin-field" placeholder="Örn: Kurucu & Geliştirici">
+            </div>
+          </div>
+
+          <button class="admin-btn" onclick="saveTeamMember()">Ekip Üyesini Ekle</button>
+
+          <hr style="margin: 2rem 0; border: none; border-top: 1px solid #f1f5f9;">
+
+          <h4>Mevcut Ekip Kadrosu</h4>
+          <div id="teamList" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- 3. GALERİ YÖNETİMİ -->
+        <div id="sectionGallery" style="display: none;">
+          <div class="card-title-bar">
+            <h3>Galeriye Medya Ekle (Resim veya Video)</h3>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="admin-input-group">
+              <label>Başlık</label>
+              <input type="text" id="galleryTitle" class="admin-field" placeholder="Örn: Otomatik Demir Çiftliği">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+              <div class="admin-input-group">
+                <label>Medya Türü</label>
+                <select id="galleryType" class="admin-field" onchange="toggleVideoThumbnailInput()">
+                  <option value="image">Fotoğraf (Görsel URL)</option>
+                  <option value="video">Video (MP4 veya YouTube Link)</option>
+                </select>
+              </div>
+
+              <div class="admin-input-group">
+                <label>Medya URL Adresi</label>
+                <input type="text" id="galleryImgUrl" class="admin-field" placeholder="https://...">
+              </div>
+
+              <div class="admin-input-group">
+                <label>Tarih (Çekildiği / Yapıldığı Tarih)</label>
+                <input type="date" id="galleryDate" class="admin-field">
+              </div>
+            </div>
+
+            <div class="admin-input-group" id="thumbGroup" style="display: none;">
+              <label>Özel Kapak Resmi URL (İsteğe Bağlı)</label>
+              <input type="text" id="galleryThumbUrl" class="admin-field" placeholder="https://...">
+            </div>
+
+            <div class="admin-input-group">
+              <label>Açıklama</label>
+              <input type="text" id="galleryDesc" class="admin-field" placeholder="Açıklama yazın...">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem;">
+              <input type="checkbox" id="galleryShowOnHome" style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="galleryShowOnHome" style="font-weight: 700; color: #0f172a; font-size: 0.9rem; cursor: pointer;">Ana Sayfadaki "Sunucumuzdan Kareler" Bölümünde Göster</label>
+            </div>
+          </div>
+
+          <button class="admin-btn" onclick="saveGalleryItem()">Medyayı Yayınla</button>
+
+          <hr style="margin: 2rem 0; border: none; border-top: 1px solid #f1f5f9;">
+
+          <h4>Kayıtlı Medyalar</h4>
+          <div id="galleryList" style="margin-top: 1rem;"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MEDYA DÜZENLEME MODALI -->
+  <div id="editGalleryModal" class="edit-modal-overlay" style="display: none;">
+    <div class="edit-modal-box">
+      <div class="card-title-bar" style="margin-bottom: 1rem;">
+        <h3>Medya İçeriğini Düzenle</h3>
+        <button class="btn-action btn-delete" onclick="closeEditModal()">✕ Kapat</button>
+      </div>
+
+      <input type="hidden" id="editItemId">
+
+      <div class="admin-input-group">
+        <label>Başlık</label>
+        <input type="text" id="editTitle" class="admin-field">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="admin-input-group">
+          <label>Medya URL</label>
+          <input type="text" id="editUrl" class="admin-field">
+        </div>
+        <div class="admin-input-group">
+          <label>Tarih</label>
+          <input type="date" id="editDate" class="admin-field">
+        </div>
+      </div>
+
+      <div class="admin-input-group">
+        <label>Açıklama</label>
+        <textarea id="editDesc" class="admin-field" style="height: 80px; resize: vertical;"></textarea>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem;">
+        <input type="checkbox" id="editShowOnHome" style="width: 18px; height: 18px; cursor: pointer;">
+        <label for="editShowOnHome" style="font-weight: 700; color: #0f172a; font-size: 0.9rem; cursor: pointer;">Ana Sayfada Göster</label>
+      </div>
+
+      <button class="admin-btn" onclick="updateGalleryItem()">Değişiklikleri Kaydet</button>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASS = "1234";
+
+    function getYoutubeThumbnail(url) {
+      if (!url) return null;
+      let videoId = null;
+      if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1]?.split('&')[0];
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('embed/')[1]?.split('?')[0];
+      }
+      return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+    }
+
+    function checkAdminLogin() {
+      const pass = document.getElementById("adminPassword").value;
+      if (pass === ADMIN_PASS) {
+        sessionStorage.setItem("admin_auth", "true");
+        showDashboard();
+      } else {
+        alert("Hatalı Şifre!");
+      }
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem("admin_auth");
+      location.reload();
+    }
+
+    function showDashboard() {
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("dashboardSection").style.display = "block";
+      
+      const savedDiscord = localStorage.getItem("perseus_discord_url") || "https://discord.gg";
+      document.getElementById("discordServerUrl").value = savedDiscord;
+
+      document.getElementById("galleryDate").valueAsDate = new Date();
+
+      renderSocialsList();
+      renderTeamList();
+      renderGalleryList();
+    }
+
+    function switchSection(sec) {
+      document.getElementById("sectionDiscord").style.display = sec === 'discord' ? 'block' : 'none';
+      document.getElementById("sectionSocials").style.display = sec === 'socials' ? 'block' : 'none';
+      document.getElementById("sectionTeam").style.display = sec === 'team' ? 'block' : 'none';
+      document.getElementById("sectionGallery").style.display = sec === 'gallery' ? 'block' : 'none';
+
+      document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function saveDiscordUrl() {
+      const url = document.getElementById("discordServerUrl").value.trim();
+      if (!url) return alert("Geçerli bir Discord adresi yazmalısınız!");
+      
+      localStorage.setItem("perseus_discord_url", url);
+      alert("Discord sunucu bağlantısı başarıyla güncellendi!");
+    }
+
+    function savePlayerSocials() {
+      const name = document.getElementById("pSocialName").value.trim().toLowerCase();
+      if (!name) return alert("Oyuncu adı yazmalısınız!");
+
+      const db = JSON.parse(localStorage.getItem("player_socials_db") || "{}");
+      db[name] = {
+        discord: document.getElementById("pSocialDc").value.trim(),
+        namemc: document.getElementById("pSocialNameMc").value.trim(),
+        youtube: document.getElementById("pSocialYt").value.trim(),
+        instagram: document.getElementById("pSocialIg").value.trim(),
+        twitch: document.getElementById("pSocialTw").value.trim(),
+        kick: document.getElementById("pSocialKick").value.trim()
+      };
+
+      localStorage.setItem("player_socials_db", JSON.stringify(db));
+      alert(`${name} için sosyal medya bağlantıları kaydedildi!`);
+      clearSocialInputs();
+      renderSocialsList();
+    }
+
+    function deleteSocial(name) {
+      const db = JSON.parse(localStorage.getItem("player_socials_db") || "{}");
+      delete db[name];
+      localStorage.setItem("player_socials_db", JSON.stringify(db));
+      renderSocialsList();
+    }
+
+    function renderSocialsList() {
+      const container = document.getElementById("socialsList");
+      const db = JSON.parse(localStorage.getItem("player_socials_db") || "{}");
+      container.innerHTML = "";
+
+      if (Object.keys(db).length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">Henüz eklenmiş sosyal medya kaydı yok.</p>';
+        return;
+      }
+
+      for (let pName in db) {
+        container.innerHTML += `
+          <div class="admin-list-item">
+            <div class="item-info">
+              <img src="https://mc-heads.net/avatar/${pName}/64" alt="${pName}">
+              <div>
+                <div class="item-title">${pName}</div>
+                <div class="item-sub">Sosyal medya bağlantıları tanımlı</div>
+              </div>
+            </div>
+            <button class="btn-action btn-delete" onclick="deleteSocial('${pName}')">Sil</button>
+          </div>
+        `;
+      }
+    }
+
+    function clearSocialInputs() {
+      document.getElementById("pSocialName").value = "";
+      document.getElementById("pSocialDc").value = "";
+      document.getElementById("pSocialNameMc").value = "";
+      document.getElementById("pSocialYt").value = "";
+      document.getElementById("pSocialIg").value = "";
+      document.getElementById("pSocialTw").value = "";
+      document.getElementById("pSocialKick").value = "";
+    }
+
+    function saveTeamMember() {
+      const name = document.getElementById("teamMemberName").value.trim();
+      const role = document.getElementById("teamMemberRole").value.trim();
+      if (!name || !role) return alert("Lütfen tüm alanları doldurun!");
+
+      const team = JSON.parse(localStorage.getItem("custom_team_db") || "[]");
+      team.push({ name, role });
+      localStorage.setItem("custom_team_db", JSON.stringify(team));
+
+      alert(`${name} ekibe eklendi!`);
+      document.getElementById("teamMemberName").value = "";
+      document.getElementById("teamMemberRole").value = "";
+      renderTeamList();
+    }
+
+    function deleteTeamMember(idx) {
+      const team = JSON.parse(localStorage.getItem("custom_team_db") || "[]");
+      team.splice(idx, 1);
+      localStorage.setItem("custom_team_db", JSON.stringify(team));
+      renderTeamList();
+    }
+
+    function renderTeamList() {
+      const container = document.getElementById("teamList");
+      const team = JSON.parse(localStorage.getItem("custom_team_db") || "[]");
+      container.innerHTML = "";
+
+      if (team.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">Özel eklenmiş ekip üyesi yok.</p>';
+        return;
+      }
+
+      team.forEach((m, idx) => {
+        container.innerHTML += `
+          <div class="admin-list-item">
+            <div class="item-info">
+              <img src="https://mc-heads.net/avatar/${m.name}/64" alt="${m.name}">
+              <div>
+                <div class="item-title">${m.name}</div>
+                <div class="item-sub">${m.role}</div>
+              </div>
+            </div>
+            <button class="btn-action btn-delete" onclick="deleteTeamMember(${idx})">Sil</button>
+          </div>
+        `;
+      });
+    }
+
+    function toggleVideoThumbnailInput() {
+      const type = document.getElementById("galleryType").value;
+      document.getElementById("thumbGroup").style.display = type === 'video' ? 'block' : 'none';
+    }
+
+    function saveGalleryItem() {
+      const title = document.getElementById("galleryTitle").value.trim();
+      const type = document.getElementById("galleryType").value;
+      const url = document.getElementById("galleryImgUrl").value.trim();
+      let thumb = document.getElementById("galleryThumbUrl").value.trim();
+      const desc = document.getElementById("galleryDesc").value.trim();
+      const showOnHome = document.getElementById("galleryShowOnHome").checked;
+      const customDateVal = document.getElementById("galleryDate").value;
+
+      if (!title || !url) return alert("Başlık ve URL adresi zorunludur!");
+
+      if (!thumb && type === 'video') {
+        thumb = getYoutubeThumbnail(url);
+      }
+
+      const gallery = JSON.parse(localStorage.getItem("custom_gallery_db") || "[]");
+      
+      let selectedDate = customDateVal ? new Date(customDateVal) : new Date();
+      let dateStr = selectedDate.toLocaleDateString('tr-TR');
+
+      gallery.push({
+        id: "img_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+        title, type, url, thumbnail: thumb, desc, showOnHome,
+        date: dateStr,
+        isoDate: selectedDate.toISOString().split('T')[0],
+        timestamp: selectedDate.getTime()
+      });
+
+      localStorage.setItem("custom_gallery_db", JSON.stringify(gallery));
+
+      alert("Medya başarıyla eklendi!");
+      document.getElementById("galleryTitle").value = "";
+      document.getElementById("galleryImgUrl").value = "";
+      document.getElementById("galleryThumbUrl").value = "";
+      document.getElementById("galleryDesc").value = "";
+      document.getElementById("galleryShowOnHome").checked = false;
+      document.getElementById("galleryDate").valueAsDate = new Date();
+
+      renderGalleryList();
+    }
+
+    function openEditModalById(id) {
+      const gallery = JSON.parse(localStorage.getItem("custom_gallery_db") || "[]");
+      const item = gallery.find(g => g.id === id);
+      if (!item) return;
+
+      document.getElementById("editItemId").value = id;
+      document.getElementById("editTitle").value = item.title || "";
+      document.getElementById("editUrl").value = item.url || "";
+      document.getElementById("editDesc").value = item.desc || "";
+      document.getElementById("editShowOnHome").checked = !!item.showOnHome;
+      
+      if (item.isoDate) {
+        document.getElementById("editDate").value = item.isoDate;
+      }
+
+      document.getElementById("editGalleryModal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById("editGalleryModal").style.display = "none";
+    }
+
+    function updateGalleryItem() {
+      const id = document.getElementById("editItemId").value;
+      const gallery = JSON.parse(localStorage.getItem("custom_gallery_db") || "[]");
+
+      const itemIndex = gallery.findIndex(g => g.id === id);
+      if (itemIndex === -1) return alert("Öğe bulunamadı!");
+
+      const title = document.getElementById("editTitle").value.trim();
+      const url = document.getElementById("editUrl").value.trim();
+      const desc = document.getElementById("editDesc").value.trim();
+      const showOnHome = document.getElementById("editShowOnHome").checked;
+      const dateVal = document.getElementById("editDate").value;
+
+      if (!title || !url) return alert("Başlık ve URL zorunludur!");
+
+      let selectedDate = dateVal ? new Date(dateVal) : new Date();
+
+      gallery[itemIndex].title = title;
+      gallery[itemIndex].url = url;
+      gallery[itemIndex].desc = desc;
+      gallery[itemIndex].showOnHome = showOnHome;
+      gallery[itemIndex].date = selectedDate.toLocaleDateString('tr-TR');
+      gallery[itemIndex].isoDate = selectedDate.toISOString().split('T')[0];
+      gallery[itemIndex].timestamp = selectedDate.getTime();
+
+      if (gallery[itemIndex].type === 'video' && !gallery[itemIndex].thumbnail) {
+        gallery[itemIndex].thumbnail = getYoutubeThumbnail(url);
+      }
+
+      localStorage.setItem("custom_gallery_db", JSON.stringify(gallery));
+      alert("Medya bilgileri güncellendi!");
+      closeEditModal();
+      renderGalleryList();
+    }
+
+    function deleteGalleryItemById(id) {
+      if (!confirm("Bu medyayı silmek istediğinize emin misiniz?")) return;
+      let gallery = JSON.parse(localStorage.getItem("custom_gallery_db") || "[]");
+      gallery = gallery.filter(g => g.id !== id);
+      localStorage.setItem("custom_gallery_db", JSON.stringify(gallery));
+      renderGalleryList();
+    }
+
+    function renderGalleryList() {
+      const container = document.getElementById("galleryList");
+      let gallery = JSON.parse(localStorage.getItem("custom_gallery_db") || "[]");
+      container.innerHTML = "";
+
+      if (gallery.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">Özel eklenmiş medya yok.</p>';
+        return;
+      }
+
+      let needsSave = false;
+      gallery.forEach((g, idx) => {
+        if (!g.id) {
+          g.id = "img_" + (Date.now() + idx);
+          needsSave = true;
+        }
+      });
+      if (needsSave) {
+        localStorage.setItem("custom_gallery_db", JSON.stringify(gallery));
+      }
+
+      gallery.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+      gallery.forEach((g) => {
+        const homeTag = g.showOnHome ? '<span style="color:#2563eb; font-weight:800; font-size:0.75rem;"> [Ana Sayfa]</span>' : '';
+        
+        let displayThumb = g.thumbnail;
+        if (!displayThumb && g.type === 'video') {
+          displayThumb = getYoutubeThumbnail(g.url);
+        }
+        if (!displayThumb) {
+          displayThumb = g.url;
+        }
+
+        container.innerHTML += `
+          <div class="admin-list-item">
+            <div class="item-info">
+              <img src="${displayThumb}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
+              <div>
+                <div class="item-title">${g.title} (${g.type ? g.type.toUpperCase() : 'IMAGE'}) ${homeTag}</div>
+                <div class="item-sub">${g.desc || 'Açıklama yok'} - <b>${g.date || ''}</b></div>
+              </div>
+            </div>
+            <div style="display:flex; gap:0.4rem;">
+              <button class="btn-action btn-edit" onclick="openEditModalById('${g.id}')">Düzenle</button>
+              <button class="btn-action btn-delete" onclick="deleteGalleryItemById('${g.id}')">Sil</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem("admin_auth") === "true") {
+        showDashboard();
+      }
+    });
+  </script>
+</body>
+</html>
