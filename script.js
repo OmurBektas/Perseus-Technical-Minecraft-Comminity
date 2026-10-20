@@ -16,7 +16,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 1. CANLI SAYAÇ
+// YOUTUBE KAPAK RESMİ ÇÖZÜCÜ
+function getYoutubeThumbnail(url) {
+  if (!url) return null;
+  let videoId = null;
+  if (url.includes('youtube.com/watch?v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0];
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0];
+  } else if (url.includes('youtube.com/embed/')) {
+    videoId = url.split('embed/')[1]?.split('?')[0];
+  }
+  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+}
+
+// 1. CANLI SAYAÇ (07/07/2025)
 const startDate = new Date("2025-07-07T00:00:00").getTime();
 
 function updateTimer() {
@@ -51,11 +65,11 @@ async function syncDiscordLinks() {
       });
     }
   } catch (e) {
-    console.error(e);
+    console.error("Discord adresi yüklenemedi:", e);
   }
 }
 
-// 3. SKOR TABLOSU
+// 3. SKOR TABLOSU YÜKLEYİCİ
 async function loadServerStats() {
   try {
     const response = await fetch('stats.json');
@@ -86,7 +100,9 @@ async function loadServerStats() {
         `;
       });
     }
-  } catch (error) { console.error(error); }
+  } catch (error) {
+    console.error("Stats çekilemedi:", error);
+  }
 }
 
 // 4. FIREBASE'DEN EKİP VE GALERİ VERİLERİNİ YÜKLEME
@@ -94,7 +110,7 @@ async function loadDynamicTeamAndGallery() {
   const teamContainer = document.getElementById("teamContainer");
   const galleryContainer = document.getElementById("galleryContainer");
 
-  // EKİP YÜKLEME (Sıralı & Sadece Aktif Olanlar)
+  // Ekip Yükleme (Sıralı & Aktif Üyeler)
   if (teamContainer) {
     try {
       const teamSnap = await getDocs(collection(db, "team"));
@@ -102,12 +118,11 @@ async function loadDynamicTeamAndGallery() {
 
       teamSnap.forEach(docSnap => {
         const m = docSnap.data();
-        if (m.active !== false) { // Sadece aktif üyeleri göster
+        if (m.active !== false) {
           teamMembers.push(m);
         }
       });
 
-      // Sıralamaya göre diz
       teamMembers.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
       let teamHtml = "";
@@ -144,21 +159,28 @@ async function loadDynamicTeamAndGallery() {
         });
       }
       teamContainer.innerHTML = teamHtml;
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error("Ekip yükleme hatası:", e);
+    }
   }
 
-  // GALERİ YÜKLEME
+  // Galeri Yükleme (Ana Sayfa Kapak Çözümlemeli)
   if (galleryContainer) {
     try {
       const gallerySnap = await getDocs(collection(db, "gallery"));
       galleryContainer.innerHTML = "";
+
       gallerySnap.forEach(docSnap => {
         const g = docSnap.data();
         if (g.showOnHome) {
+          // Kapak resmi veya Youtube kapak resmi veya doğrudan görsel URL'si
+          let displayThumb = g.thumbnail || (g.type === 'video' ? getYoutubeThumbnail(g.url) : g.url);
+          if (!displayThumb) displayThumb = g.url;
+
           galleryContainer.innerHTML += `
             <div class="gallery-card" onclick="window.location.href='gallery/index.html'">
               <div class="gallery-img-wrapper">
-                <img src="${g.url}" alt="${g.title}">
+                <img src="${displayThumb}" alt="${g.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800'">
               </div>
               <div class="gallery-info">
                 <h3>${g.title}</h3>
@@ -169,11 +191,13 @@ async function loadDynamicTeamAndGallery() {
           `;
         }
       });
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error("Galeri yükleme hatası:", e);
+    }
   }
 }
 
-// 5. OYUNCU BİLGİ KARTINI AÇMA MODALI
+// 5. OYUNCU BİLGİ KART MODALI
 window.openPlayerCardModal = function(playerName, role, playerSocials = {}) {
   let modal = document.getElementById("playerCardModal");
   if (!modal) {
@@ -237,4 +261,15 @@ document.addEventListener("DOMContentLoaded", () => {
   syncDiscordLinks();
   loadServerStats();
   loadDynamicTeamAndGallery();
+});
+
+// 6. ADMIN PANELİNE GİRİŞ KISAYOLU (F8 veya Ctrl + Shift + P)
+window.addEventListener("keydown", function(e) {
+  const isF8 = e.key === "F8" || e.keyCode === 119;
+  const isShortcut = (e.ctrlKey && e.shiftKey && (e.key === "P" || e.key === "p"));
+
+  if (isF8 || isShortcut) {
+    e.preventDefault();
+    window.location.href = "admin/index.html";
+  }
 });
